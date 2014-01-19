@@ -1,14 +1,6 @@
 /**
  * New node file
  */
-pc_js2java.event = {};
-pc_js2java.prototype.cb_createAnswer = function() {
-	
-}
-
-pc_js2java.prototype.cb_createOffer = function() {
-	
-}
 
 artc = window.androidRTCPeerConnection = function() {
 	
@@ -26,16 +18,18 @@ artc.prototype.close = function() {
 	pc_js2java.close();
 };
 
-artc.prototype.createAnswer = function() {
+artc.prototype.createAnswer = function(cb) {
 	pc_js2java.createAnswer();
+	artc.prototype.cb_createAnswer = cb;
 };
 
 artc.prototype.createDataChannel = function() {
 	pc_js2java.createDataChannel();
 };
 
-artc.prototype.createOffer = function() {
+artc.prototype.createOffer = function(cb) {
 	pc_js2java.createOffer();
+	artc.prototype.cb_createOffer = cb;
 };
 
 artc.prototype.getLocalStreams = function() {
