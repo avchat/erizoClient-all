@@ -1,4 +1,4 @@
-erizoClient-android
+erizoClient-all
 ===================
 
-erizoClient-android
+erizoClient-all
