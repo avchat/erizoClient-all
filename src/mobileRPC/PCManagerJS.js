@@ -10,12 +10,10 @@ PCManagerJS = function() {
 
 PCManagerJS._pc_id = 0;
 PCManagerJS.pc_list = {};
-pcManagerJS.method_map = {
-		'new_pc':1,'addStream':2,'removeStream':3,
-		'close':4,'createAnswer':5,'createOffer':6,
-		'createDataChannel':7,'setLocalDescription':8,'setRemoteDescription':9,
-		'updateIce':10,'addIceCandidate':11,'getStats':12
-		};
+
+pcManagerJS.method_map = {'new_pc':1,'addStream':2,'removeStream':3,'close':4,'createAnswer':5,
+		'createOffer':6,'createDataChannel':7,'setLocalDescription':8,'setRemoteDescription':9,
+		'updateIce':10,'addIceCandidate':11,'getStats':12};
 
 PCManagerJS.prototype.new_pc = function(pc) {
 	PCManagerJS._pc_id++;	
@@ -25,7 +23,7 @@ PCManagerJS.prototype.new_pc = function(pc) {
 };
 
 PCManagerJS.prototype.call_method = function(method_name, pc_id, param_obj) {
-	return JSON.parse(pcManagerProxy.call_method(method_name, pc_id, JSON.stringify(param_obj)));
+	return JSON.parse(pcManagerProxy.call_method(pcManagerJS.method_map[method_name], pc_id, JSON.stringify(param_obj)));
 };
 
 PCManagerJS.prototype.cb_method = function(method_name, pc_id, param_str) {
