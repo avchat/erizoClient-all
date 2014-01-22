@@ -6,7 +6,7 @@ Erizo.ChromeStableStack = function (spec) {
     "use strict";
 
     var that = {},
-        WebkitRTCPeerConnection = webkitRTCPeerConnection || AndroidPeerConnection || IOSPeerConnection;
+        WebkitRTCPeerConnection = webkitRTCPeerConnection;
 
     that.pc_config = {
         "iceServers": []

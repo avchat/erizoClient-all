@@ -2,7 +2,7 @@
  * New node file
  */
 
-artc = window.WebkitRTCPeerConnection = function() {
+window.AndroidPeerConnection = function() {
 	artc._id = artc._id++;
 };
 

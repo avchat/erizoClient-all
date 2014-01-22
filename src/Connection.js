@@ -45,7 +45,7 @@ Erizo.Connection = function (spec) {
 Erizo.GetUserMedia = function (config, callback, error) {
     "use strict";
 
-    /*navigator.getMedia = ( navigator.getUserMedia ||
+    navigator.getMedia = ( navigator.getUserMedia ||
                        navigator.webkitGetUserMedia ||
                        navigator.mozGetUserMedia ||
                        navigator.msGetUserMedia);
@@ -54,9 +54,5 @@ Erizo.GetUserMedia = function (config, callback, error) {
         L.Logger.error('Video/audio streams not supported in erizofc yet');
     } else {
         navigator.getMedia(config, callback, error);
-    }*/
-    avDeviceManager.callback = callback;
-    avDeviceManager.error = error;
-    
-    avDeviceManager.get_user_media(config);
+    }
 };
