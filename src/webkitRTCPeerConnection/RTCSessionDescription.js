@@ -1,6 +1,8 @@
 /**
- * New node file
+ * RTCSessionDescription.js file
  */
-sd = window.RTCSessionDescription = function() {
-	
+
+window.RTCSessionDescription = function(param_obj) {
+	this.type = param_obj.type;
+	this.sdp = param_obj.sdp;
 };

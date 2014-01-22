@@ -1,6 +1,9 @@
 /**
- * New node file
+ * RTCIceCandidate.js file
  */
-ic = window.RTCIceCandidate = function(){
-	
+
+window.RTCIceCandidate = function(param_obj){
+	this.sdpMid = param_obj.sdpMid;
+	this.sdpMLineIndex = param_obj.sdpMLineIndex;
+	this.sdp = param_obj.sdp;
 };

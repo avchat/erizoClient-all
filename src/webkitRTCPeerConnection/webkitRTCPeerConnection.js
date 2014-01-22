@@ -1,67 +1,57 @@
 /**
- * New node file
+ * webkitRTCPeerConnection.js file
  */
 
-window.AndroidPeerConnection = function() {
-	artc._id = artc._id++;
+webkitRTCPeerConnection = function() {
+	this.pc_id = pcManagerJS.new_pc(this);
 };
 
-artc.prototype._id = 0;
-
-artc.prototype.addIceCandidate = function() {
-	pcManager.addIceCandidate();
+webkitRTCPeerConnection.prototype.addStream = function(stream) {
+	pcManagerJS.addStream(pc_id, stream);
 };
 
-artc.prototype.addStream = function() {
-	pcManager.add_Stream(_id);
+webkitRTCPeerConnection.prototype.removeStream = function(stream) {	
+	pcManagerJS.removeStream(pc_id, stream);
 };
 
-artc.prototype.close = function() {
-	pcManager.close();
+webkitRTCPeerConnection.prototype.close = function() {
+	pcManagerJS.close(pc_id);
 };
 
-artc.prototype.createAnswer = function(cb) {
-	pcManager.createAnswer();
-	artc.prototype.cb_createAnswer = cb;
+webkitRTCPeerConnection.prototype.createAnswer = function(callback, obj, constraints) {
+	this.createAnswer_callback = callback;
+	
+	pcManagerJS.createAnswer(pc_id, constraints);	
 };
 
-artc.prototype.createDataChannel = function() {
-	pcManager.createDataChannel();
+webkitRTCPeerConnection.prototype.createOffer = function(callback, obj, constraints) {
+	this.createOffer_callback = callback;
+	
+	pcManagerJS.createOffer(pc_id, constraints);	
 };
 
-artc.prototype.createOffer = function(cb) {
-	pcManager.createOffer();
-	artc.prototype.cb_createOffer = cb;
+webkitRTCPeerConnection.prototype.createDataChannel = function(param) {
+	pcManagerJS.createDataChannel(pc_id, param);
 };
 
-artc.prototype.getLocalStreams = function() {
-	pcManager.getLocalStreams();
+webkitRTCPeerConnection.prototype.setLocalDescription = function(sd) {
+	pcManagerJS.setLocalDescription(pc_id, sd);
 };
 
-artc.prototype.getRemoteStreams = function() {
-	pcManager.getRemoteStreams();
+webkitRTCPeerConnection.prototype.setRemoteDescription = function(sd) {
+	pcManagerJS.setRemoteDescription(pc_id, sd);
 };
 
-artc.prototype.getStats = function() {
-	pcManager.getStats();
+webkitRTCPeerConnection.prototype.updateIce = function(param) {
+	pcManagerJS.updateIce(pc_id, param);
 };
 
-artc.prototype.getStreamById = function() {
-	pcManager.getStreamById();
+webkitRTCPeerConnection.prototype.addIceCandidate = function(ice) {
+	pcManagerJS.addIceCandidate(pc_id, ice);
 };
 
-artc.prototype.removeStream = function() {
-	pcManager.removeStream();
+webkitRTCPeerConnection.prototype.getStats = function() {
+	return pcManagerJS.getStats(pc_id);
 };
 
-artc.prototype.setLocalDescription = function() {
-	pcManager.setLocalDescription();
-};
 
-artc.prototype.setRemoteDescription = function() {
-	pcManager.setRemoteDescription();
-};
-
-artc.prototype.updateIce = function() {
-	pcManager.updateIce();
-};
