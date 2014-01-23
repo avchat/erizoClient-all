@@ -25,10 +25,12 @@ Erizo.VideoPlayer = function (spec) {
 
     // It will stop the VideoPlayer and remove it from the HTML
     that.destroy = function () {        
-    	return pcManagerJS.call_method(PCManagerJS.method_map['delete_pc'], that.stream.pc_id, {});
+    	return pcManagerJS.call_method(PCManagerJS.method_map['delete_pc'], that.stream.pc_id, {'play_id':that.id,
+    		'view_id':that.elementID});
     };
 
-    playerManager.create_video_player();
+    pcManagerJS.call_method(PCManagerJS.method_map['new_player'], that.stream.pc_id, {'play_id':that.id,
+		'view_id':that.elementID});
     
     return that;
 };
