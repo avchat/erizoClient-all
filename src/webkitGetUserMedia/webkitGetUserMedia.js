@@ -5,22 +5,20 @@
 navigator.webkitGetUserMedia =  function(config, callback, error) {
 	this.callback = callback;
 	this.error = error;
+	
 		
-	var config_str = JSON.stringify(config);
+	pcManagerJS.call_method(PCManagerJS.method_map['get_user_media'], 0, config);
 	
-	if(avDeviceManager !== undefined) {
-		avDeviceManager.get_user_media(config_str);
+	return this.mediastram;
+};
+
+navigator.webkitGetUserMedia.prototype.cb_getusermedia = function(param) {
+	if(true) {
+		this.mediastream = new MediaStream();
+		this.callback(this.mediastream);
+	} else {
+		var error = {};
+		error.code = 0;
+		this.error(error);
 	}
-};
-
-navigator.webkitGetUserMedia.prototype.cb_callback = function(param_str) {
-	var param_obj = JSON.parse(param_str);
-	
-	this.callback(param_obj);
-};
-
-navigator.webkitGetUserMedia.prototype.cb_error = function(param_str) {
-	var param_obj = JSON.parse(param_str);	
-	
-	this.error(param_obj);
 };

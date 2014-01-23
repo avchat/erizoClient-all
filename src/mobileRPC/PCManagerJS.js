@@ -9,18 +9,18 @@ PCManagerJS = function() {
 };
 
 PCManagerJS._pc_id = 0;
-PCManagerJS.pc_list = {};
+PCManagerJS.pc_map = {};
 
 pcManagerJS.method_map = {'new_pc':1,'addStream':2,'removeStream':3,'close':4,'createAnswer':5,
 		'createOffer':6,'createDataChannel':7,'setLocalDescription':8,'setRemoteDescription':9,
-		'updateIce':10,'addIceCandidate':11,'getStats':12,'media_stop':13,'new_view':14,'delete_view':15,
+		'updateIce':10,'addIceCandidate':11,'getStats':12,'mediastream_stop':13,'new_view':14,'delete_view':15,
 		'new_player':16,'delete_player':17,'get_user_media':18};
 
 PCManagerJS.prototype.new_pc = function(pc) {
 	PCManagerJS._pc_id++;	
-	pc_list[PCManagerJS._pc_id] = pc;	
+	PCManagerJS.pc_map[PCManagerJS._pc_id] = pc;	
 	PCManagerJS.prototype.call_method(pcManagerJS.method_map['new_pc'], PCManagerJS._pc_id, {});
-	return _pc_id;
+	return PCManagerJS._pc_id;
 };
 
 PCManagerJS.prototype.call_method = function(method_name, pc_id, param_obj) {
@@ -34,6 +34,8 @@ PCManagerJS.prototype.cb_method = function(method_name, pc_id, param_str) {
 		this.pc_list[pc_id].createOffer_callback(param_obj);break;
 	case 'cb_createAnswer':
 		this.pc_list[pc_id].createAnswer_callback(param_obj);break;
+	case 'cb_getusermedia':
+		this.pc_list[pc_id].getUserMedia_callback(param_obj);break;		
 	case 'onSignalingChange':
 		this.pc_list[pc_id].onSignalingChange(param_obj);break;
 	case 'onIceConnectionChange':
@@ -49,6 +51,6 @@ PCManagerJS.prototype.cb_method = function(method_name, pc_id, param_str) {
 	case 'onRemoveStream':
 		this.pc_list[pc_id].onRemoveStream(param_obj);break;
 	case 'onDataChannel':
-		this.pc_list[pc_id].onDataChannel(param_obj);break;
+		this.pc_list[pc_id].onDataChannel(param_obj);break;	
 	}
 };
