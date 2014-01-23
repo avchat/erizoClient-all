@@ -12,7 +12,7 @@ navigator.webkitGetUserMedia =  function(config, callback, error) {
 	return this.mediastram;
 };
 
-navigator.webkitGetUserMedia.prototype.cb_getusermedia = function(param) {
+navigator.webkitGetUserMedia.prototype.cb_getUserMedia = function(param) {
 	if(true) {
 		this.mediastream = new MediaStream();
 		this.callback(this.mediastream);

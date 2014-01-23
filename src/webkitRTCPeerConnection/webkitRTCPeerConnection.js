@@ -21,13 +21,13 @@ webkitRTCPeerConnection.close = function() {
 };
 
 webkitRTCPeerConnection.createAnswer = function(callback, obj, constraints) {
-	this.createAnswer_callback = callback;
+	this.cb_createAnswer = callback;
 	
 	return pcManagerJS.call_method(PCManagerJS.method_map['createAnswer'], this.pc_id, constraints);
 };
 
 webkitRTCPeerConnection.createOffer = function(callback, obj, constraints) {
-	this.createOffer_callback = callback;
+	this.cb_createOffer = callback;
 	
 	return pcManagerJS.call_method(PCManagerJS.method_map['createOffer'], this.pc_id, constraints);
 };

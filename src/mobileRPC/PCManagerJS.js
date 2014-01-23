@@ -31,11 +31,11 @@ PCManagerJS.prototype.cb_method = function(method_name, pc_id, param_str) {
 	var param_obj = JSON.parse(param_str);
 	switch(method_name) {
 	case 'cb_createOffer':
-		this.pc_list[pc_id].createOffer_callback(param_obj);break;
+		this.pc_list[pc_id].cb_createOffer(param_obj);break;
 	case 'cb_createAnswer':
-		this.pc_list[pc_id].createAnswer_callback(param_obj);break;
-	case 'cb_getusermedia':
-		this.pc_list[pc_id].getUserMedia_callback(param_obj);break;		
+		this.pc_list[pc_id].cb_createAnswer(param_obj);break;
+	case 'cb_getUserMedia':
+		this.pc_list[pc_id].cb_getUserMedia(param_obj);break;		
 	case 'onSignalingChange':
 		this.pc_list[pc_id].onSignalingChange(param_obj);break;
 	case 'onIceConnectionChange':
