@@ -13,7 +13,8 @@ PCManagerJS.pc_list = {};
 
 pcManagerJS.method_map = {'new_pc':1,'addStream':2,'removeStream':3,'close':4,'createAnswer':5,
 		'createOffer':6,'createDataChannel':7,'setLocalDescription':8,'setRemoteDescription':9,
-		'updateIce':10,'addIceCandidate':11,'getStats':12};
+		'updateIce':10,'addIceCandidate':11,'getStats':12,'media_stop':13,'new_view':14,'delete_view':15,
+		'new_player':16,'delete_player':17,'get_user_media':18};
 
 PCManagerJS.prototype.new_pc = function(pc) {
 	PCManagerJS._pc_id++;	

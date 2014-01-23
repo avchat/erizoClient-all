@@ -28,5 +28,7 @@ Erizo.VideoPlayer = function (spec) {
     	return pcManagerJS.call_method(PCManagerJS.method_map['delete_pc'], that.stream.pc_id, {});
     };
 
+    playerManager.create_video_player();
+    
     return that;
 };
