@@ -3,7 +3,7 @@
  */
 
 webkitRTCPeerConnection = function() {
-	this.pc_id = pcManagerJS.new_pc(this);
+	this.pc_id = pcManagerJS.pc_new(this);
 };
 
 webkitRTCPeerConnection.addStream = function(stream) {
