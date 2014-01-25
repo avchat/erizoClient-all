@@ -34,36 +34,63 @@ PCManagerJS.prototype.cb_method = function(method_name, pc_id, param_str) {
 	
 	switch(method_name) {
 	case 'cb_createOffer':
-		this.pc_list[pc_id].cb_createOffer(param_obj);break;
+		var sd = new RTCSessionDescription();
+		sd.type = param_obj.type;
+		sd.sdp = param_obj.sdp;
+		PCManagerJS.pc_map[pc_id].cb_createOffer(sd);
+		break;
 	case 'cb_createAnswer':
-		this.pc_list[pc_id].cb_createAnswer(param_obj);break;
+		var sd = new RTCSessionDescription();
+		sd.type = param_obj.type;
+		sd.sdp = param_obj.sdp;
+		PCManagerJS.pc_map[pc_id].cb_createAnswer(sd);
+		break;
 	case 'cb_getUserMedia':
-		this.pc_list[pc_id].cb_getUserMedia(param_obj);break;		
+		var localMediaStream = new MediaStream();
+		localMediaStream.stream_type = param_obj.stream_type;
+		localMediaStream.pc_id = param_obj.pc_id;
+		webkitGetUserMedia.cb_getUserMedia(localMediaStream);
+		break;		
 	case 'onSignalingChange':
-		this.pc_list[pc_id].onSignalingChange(param_obj);break;
+		var state = param_obj.state;
+		PCManagerJS.pc_map[pc_id].signalingState = state;
+		PCManagerJS.pc_map[pc_id].onSignalingChange(state);
+		break;
 	case 'onIceConnectionChange':
-		this.pc_list[pc_id].onIceConnectionChange(param_obj);break;
+		var state = param_obj.state;
+		PCManagerJS.pc_map[pc_id].iceConnectionState = state;
+		PCManagerJS.pc_map[pc_id].oniceconnectionchange(state);
+		break;
 	case 'onIceGatheringChange':
-		this.pc_list[pc_id].onIceGatheringChange(param_obj);break;
+		var state = param_obj.state;
+		PCManagerJS.pc_map[pc_id].iceGatheringState = state;
+		PCManagerJS.pc_map[pc_id].onicegatheringchange(state);
+		break;
 	case 'onIceCandidate':
-		this.pc_list[pc_id].onIceCandidate(param_obj);break;
+		var ice = {};
+		ice["sdpMLineIndex"] = candidate.sdpMLineIndex;
+		ice["sdpMid"] = candidate.sdpMid;
+		ice["sdp"] = candidate.sdp;		
+		PCManagerJS.pc_map[pc_id].onicecandidate(ice);
+		break;
 	case 'onError':
-		this.pc_list[pc_id].onError(param_obj);break;
+		PCManagerJS.pc_map[pc_id].onerror();
+		break;
 	case 'onAddStream':
 		var evt = {};
 		var remoteMediaStream = new MediaStream();
-		remoteMediaStream.pc_id = pc_id;
-		remoteMediaStream.stream_id = param_obj.stream_id;
+		remoteMediaStream.pc_id = param_obj.pc_id;
+		remoteMediaStream.stream_type = param_obj.stream_type;
 		evt.stream = remoteMediaStream;
-		this.pc_list[pc_id].onaddstream(evt);
+		PCManagerJS.pc_map[pc_id].onaddstream(evt);
 		break;
 	case 'onRemoveStream':
 		var remoteMediaStream = new MediaStream();
 		remoteMediaStream.pc_id = pc_id;
-		remoteMediaStream.stream_id = param_obj.stream_id;
-		this.pc_list[pc_id].onremovestream(remoteMediaStream);
+		remoteMediaStream.stream_type = param_obj.stream_type;
+		PCManagerJS.pc_map[pc_id].onremovestream(remoteMediaStream);
 		break;
 	case 'onDataChannel':
-		this.pc_list[pc_id].onDataChannel(param_obj);break;	
+		PCManagerJS.pc_map[pc_id].onDataChannel(param_obj);break;	
 	}
 };

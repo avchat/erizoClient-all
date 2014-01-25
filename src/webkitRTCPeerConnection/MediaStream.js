@@ -3,7 +3,8 @@
  */
 
 MediaStream = function() {	
-	this.pc_id = 0;
+	this.pc_id = "";
+	this.stream_type = "local";
 };
 
 MediaStream.prototype.stop = function() {

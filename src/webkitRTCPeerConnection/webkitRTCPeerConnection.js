@@ -4,6 +4,9 @@
 
 webkitRTCPeerConnection = function() {
 	this.pc_id = pcManagerJS.pc_new(this);
+	this.iceGatheringState = "";
+	this.signalingState = "";
+	this.iceConnectionState = "";
 };
 
 webkitRTCPeerConnection.addStream = function(stream) {
