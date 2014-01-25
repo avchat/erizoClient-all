@@ -50,9 +50,19 @@ PCManagerJS.prototype.cb_method = function(method_name, pc_id, param_str) {
 	case 'onError':
 		this.pc_list[pc_id].onError(param_obj);break;
 	case 'onAddStream':
-		this.pc_list[pc_id].onAddStream(param_obj);break;
+		var evt = {};
+		var remoteMediaStream = new MediaStream();
+		remoteMediaStream.pc_id = pc_id;
+		remoteMediaStream.stream_id = param_obj.stream_id;
+		evt.stream = remoteMediaStream;
+		this.pc_list[pc_id].onaddstream(evt);
+		break;
 	case 'onRemoveStream':
-		this.pc_list[pc_id].onRemoveStream(param_obj);break;
+		var remoteMediaStream = new MediaStream();
+		remoteMediaStream.pc_id = pc_id;
+		remoteMediaStream.stream_id = param_obj.stream_id;
+		this.pc_list[pc_id].onremovestream(remoteMediaStream);
+		break;
 	case 'onDataChannel':
 		this.pc_list[pc_id].onDataChannel(param_obj);break;	
 	}
