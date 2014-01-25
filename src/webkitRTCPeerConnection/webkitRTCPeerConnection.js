@@ -9,11 +9,11 @@ webkitRTCPeerConnection = function() {
 webkitRTCPeerConnection.addStream = function(stream) {
 	stream.pc_id = this.pc_id;
 	
-	return pcManagerJS.call_method(PCManagerJS.method_map['addStream'], this.pc_id, stream);
+	return pcManagerJS.call_method(PCManagerJS.method_map['addStream'], this.pc_id, {});
 };
 
 webkitRTCPeerConnection.removeStream = function(stream) {	
-	return pcManagerJS.call_method(PCManagerJS.method_map['removeStream'], this.pc_id, stream);
+	return pcManagerJS.call_method(PCManagerJS.method_map['removeStream'], this.pc_id, {});
 };
 
 webkitRTCPeerConnection.close = function() {
