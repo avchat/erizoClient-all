@@ -25,14 +25,16 @@ webkitRTCPeerConnection.close = function() {
 
 webkitRTCPeerConnection.createAnswer = function(callback, obj, constraints) {
 	this.cb_createAnswer = callback;
-	
-	return pcManagerJS.call_method(PCManagerJS.method_map['createAnswer'], this.pc_id, constraints);
+	var param = {};
+	param.constraints = constraints;
+	return pcManagerJS.call_method(PCManagerJS.method_map['createAnswer'], this.pc_id, param);
 };
 
 webkitRTCPeerConnection.createOffer = function(callback, obj, constraints) {
 	this.cb_createOffer = callback;
-	
-	return pcManagerJS.call_method(PCManagerJS.method_map['createOffer'], this.pc_id, constraints);
+	var param = {};
+	param.constraints = constraints;
+	return pcManagerJS.call_method(PCManagerJS.method_map['createOffer'], this.pc_id, param);
 };
 
 webkitRTCPeerConnection.createDataChannel = function(param) {
