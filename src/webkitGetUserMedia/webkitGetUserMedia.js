@@ -11,13 +11,15 @@ navigator.webkitGetUserMedia =  function(config, callback, error) {
 	return this;
 };
 
-navigator.webkitGetUserMedia.prototype.cb_getUserMedia = function(param) {
-	if(true) {
+navigator.webkitGetUserMedia.prototype.cb_getUserMedia = function(param) {	
+	if(!param.error) {
 		this.mediastream = new MediaStream();
+		this.mediastream.pc_id = param.pc_id;
+		this.mediastream.stream_type = param.stream_type;
 		this.callback(this.mediastream);
 	} else {
 		var error = {};
-		error.code = 0;
+		error.code = param.error;
 		this.error(error);
 	}
 };
