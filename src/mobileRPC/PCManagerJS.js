@@ -12,7 +12,7 @@ PCManagerJS._pc_id = 0;
 PCManagerJS.pc_id = "0";
 PCManagerJS.pc_map = {};
 
-pcManagerJS.method_map = {'pc_new':1,'addStream':2,'removeStream':3,'close':4,'createAnswer':5,
+PCManagerJS.method_map = {'pc_new':1,'addStream':2,'removeStream':3,'close':4,'createAnswer':5,
 		'createOffer':6,'createDataChannel':7,'setLocalDescription':8,'setRemoteDescription':9,
 		'updateIce':10,'addIceCandidate':11,'getStats':12,'mediastream_stop':13,'view_new':14,'view_delete':15,
 		'player_new':16,'player_delete':17,'get_user_media':18};
@@ -21,12 +21,12 @@ PCManagerJS.prototype.pc_new = function(pc) {
 	PCManagerJS._pc_id++;
 	PCManagerJS.pc_id = PCManagerJS._pc_id.toString();
 	PCManagerJS.pc_map[PCManagerJS.pc_id] = pc;	
-	PCManagerJS.prototype.call_method(pcManagerJS.method_map['pc_new'], PCManagerJS.pc_id, {});
+	PCManagerJS.prototype.call_method(PCManagerJS.method_map['pc_new'], PCManagerJS.pc_id, {});
 	return PCManagerJS.pc_id;
 };
 
 PCManagerJS.prototype.call_method = function(method_name, pc_id, param_obj) {
-	pcManagerProxy.call_method(pcManagerJS.method_map[method_name], pc_id, JSON.stringify(param_obj));
+	pcManagerProxy.call_method(PCManagerJS.method_map[method_name], pc_id, JSON.stringify(param_obj));
 };
 
 PCManagerJS.prototype.cb_method = function(method_name, pc_id, param_str) {
