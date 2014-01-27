@@ -67,11 +67,13 @@ PCManagerJS.prototype.cb_method = function(method_name, pc_id, param_str) {
 		PCManagerJS.pc_map[pc_id].onicegatheringchange(state);
 		break;
 	case 'onIceCandidate':
+		var evt = {};
 		var ice = {};
 		ice["sdpMLineIndex"] = candidate.sdpMLineIndex;
 		ice["sdpMid"] = candidate.sdpMid;
-		ice["sdp"] = candidate.sdp;		
-		PCManagerJS.pc_map[pc_id].onicecandidate(ice);
+		ice["sdp"] = candidate.sdp;
+		evt.candidate = ice;
+		PCManagerJS.pc_map[pc_id].onicecandidate(evt);
 		break;
 	case 'onError':
 		PCManagerJS.pc_map[pc_id].onerror();
