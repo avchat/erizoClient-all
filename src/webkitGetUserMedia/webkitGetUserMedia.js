@@ -6,7 +6,7 @@ navigator.webkitGetUserMedia =  function(config, callback, error) {
 	this.callback = callback;
 	this.error = error;
 		
-	pcManagerJS.call_method(PCManagerJS.method_map['get_user_media'], "0", config);
+	pcManagerJS.call_method('get_user_media', "0", config);
 	
 	return this;
 };
