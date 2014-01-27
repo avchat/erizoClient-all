@@ -2,8 +2,8 @@
  * webkitRTCPeerConnection.js file
  */
 
-webkitRTCPeerConnection = function() {
-	this.pc_id = pcManagerJS.pc_new(this);
+webkitRTCPeerConnection = function(pc_config, con) {
+	this.pc_id = pcManagerJS.pc_new(this, pc_config, con);
 	this.iceGatheringState = "";
 	this.signalingState = "";
 	this.iceConnectionState = "";
