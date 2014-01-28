@@ -12,8 +12,8 @@ Erizo.Connection = function (spec) {
 
     // Check which WebRTC Stack is installed.
     that.browser = "";
-
-    if (typeof module !== 'undefined' && module.exports) {
+    
+ /*   if (typeof module !== 'undefined' && module.exports) {
         L.Logger.error('Publish/subscribe video/audio streams not supported in erizofc yet');
         that = Erizo.FcStack(spec);
     } else if (window.navigator.userAgent.match("Firefox") !== null) {
@@ -21,13 +21,13 @@ Erizo.Connection = function (spec) {
         that.browser = "mozilla";
         that = Erizo.FirefoxStack(spec);
     } else if (window.navigator.appVersion.match(/Chrome\/([\w\W]*?)\./)[1] <= 32) {
-        // Google Chrome Stable.
+        // Google Chrome Stable.*/
         L.Logger.debug("Stable!");
         that = Erizo.ChromeStableStack(spec);
         that.browser = "chrome-stable";
-    } else if (window.navigator.userAgent.toLowerCase().indexOf("chrome")>=0) {
+ /*   } else if (window.navigator.userAgent.toLowerCase().indexOf("chrome")>=0) {
         // Google Chrome Canary.
-        L.Logger.debug("Canary!");
+        L.Logger.debug("Canary!"); 
         that = Erizo.ChromeCanaryStack(spec);
         that.browser = "chrome-canary";
     }  else if (window.navigator.appVersion.match(/Bowser\/([\w\W]*?)\./)[1] === "25") {
@@ -37,7 +37,7 @@ Erizo.Connection = function (spec) {
         // None.
         that.browser = "none";
         throw "WebRTC stack not available";
-    }
+    }*/
 
     return that;
 };

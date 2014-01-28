@@ -1,3 +1,5 @@
+
+
 /**
  * webkitGetUserMedia.js file
  */
@@ -30,3 +32,4 @@ navigator.webkitGetUserMedia.prototype.cb_getUserMedia = function(param) {
 		this.error(error);
 	}
 };
+

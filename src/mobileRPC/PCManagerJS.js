@@ -1,8 +1,10 @@
+
+
 /**
  * PCManagerJS.js file
  */
 
-window.pcManagerJS = window.pcManagerJS || new PCManagerJS();
+
 
 PCManagerJS = function() {    
     
@@ -134,3 +136,6 @@ PCManagerJS.prototype.cb_method = function(method_name, pc_id, param_obj) {
 		PCManagerJS.pc_map[pc_id].onDataChannel(param_obj);break;	
 	}
 };
+
+window.pcManagerJS = window.pcManagerJS || new PCManagerJS();
+

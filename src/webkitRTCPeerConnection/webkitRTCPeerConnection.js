@@ -1,3 +1,5 @@
+
+
 /**
  * webkitRTCPeerConnection.js file
  */
@@ -62,5 +64,4 @@ webkitRTCPeerConnection.addIceCandidate = function(ice) {
 webkitRTCPeerConnection.getStats = function() {
 	return pcManagerJS.call_method('getStats', this.pc_id, {});
 };
-
 
