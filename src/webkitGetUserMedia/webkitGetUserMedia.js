@@ -12,8 +12,9 @@ navigator.webkitGetUserMedia = function(config, callback, error) {
 	// 进行获取本地流的调用
 	pcManagerJS.call_method('get_user_media', "0", config);	
 };
-
+									   
 navigator.webkitGetUserMedia.prototype.cb_getUserMedia = function(param) {	
+	console.log("cb_getUserMedia");
 	if(!param.error) { // 如果不存在错误
 		// 产生本地流对象
 		this.mediastream = new RTCMediaStream();

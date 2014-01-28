@@ -3944,8 +3944,8 @@ navigator.webkitGetUserMedia.prototype.cb_getUserMedia = function(param) {
  * webkitRTCPeerConnection.js file
  */
 
-webkitRTCPeerConnection = function() {
-	this.pc_id = pcManagerJS.pc_new(this);
+webkitRTCPeerConnection = function(pc_config, con) {
+	this.pc_id = pcManagerJS.pc_new(this, pc_config, con);
 	this.iceGatheringState = "";
 	this.signalingState = "";
 	this.iceConnectionState = "";
@@ -4086,6 +4086,8 @@ Erizo.ChromeStableStack = function (spec) {
     that.roapSessionId = 103;
 
     that.peerConnection = new WebkitRTCPeerConnection(that.pc_config, that.con);
+    console.log(that.pc_config);
+    console.log(that.con);
 
     that.peerConnection.onicecandidate = function (event) {
         L.Logger.debug("PeerConnection: ", spec.session_id);
@@ -5203,8 +5205,8 @@ Erizo.Connection = function (spec) {
 
     // Check which WebRTC Stack is installed.
     that.browser = "";
-    console.log(window.navigator.appVersion);
-    if (typeof module !== 'undefined' && module.exports) {
+    
+ /*   if (typeof module !== 'undefined' && module.exports) {
         L.Logger.error('Publish/subscribe video/audio streams not supported in erizofc yet');
         that = Erizo.FcStack(spec);
     } else if (window.navigator.userAgent.match("Firefox") !== null) {
@@ -5212,13 +5214,13 @@ Erizo.Connection = function (spec) {
         that.browser = "mozilla";
         that = Erizo.FirefoxStack(spec);
     } else if (window.navigator.appVersion.match(/Chrome\/([\w\W]*?)\./)[1] <= 32) {
-        // Google Chrome Stable.
+        // Google Chrome Stable.*/
         L.Logger.debug("Stable!");
         that = Erizo.ChromeStableStack(spec);
         that.browser = "chrome-stable";
-    } else if (window.navigator.userAgent.toLowerCase().indexOf("chrome")>=0) {
+ /*   } else if (window.navigator.userAgent.toLowerCase().indexOf("chrome")>=0) {
         // Google Chrome Canary.
-        L.Logger.debug("Canary!");
+        L.Logger.debug("Canary!"); 
         that = Erizo.ChromeCanaryStack(spec);
         that.browser = "chrome-canary";
     }  else if (window.navigator.appVersion.match(/Bowser\/([\w\W]*?)\./)[1] === "25") {
@@ -5228,7 +5230,7 @@ Erizo.Connection = function (spec) {
         // None.
         that.browser = "none";
         throw "WebRTC stack not available";
-    }
+    }*/
 
     return that;
 };
@@ -6583,7 +6585,7 @@ Erizo.Speaker = function (spec) {
  * PCManagerJS.js file
  */
 
-window.pcManagerJS = window.pcManagerJS || new PCManagerJS();
+
 
 PCManagerJS = function() {    
     
@@ -6593,7 +6595,7 @@ PCManagerJS._pc_id = 0;
 PCManagerJS.pc_id = "0";
 PCManagerJS.pc_map = {};
 
-PCManagerJS.prototype.pc_new = function(pc) {
+PCManagerJS.prototype.pc_new = function(pc, pc_config, con) {
 	// 生成pc的id
 	PCManagerJS._pc_id++;
 	PCManagerJS.pc_id = PCManagerJS._pc_id.toString();
@@ -6602,7 +6604,10 @@ PCManagerJS.prototype.pc_new = function(pc) {
 	PCManagerJS.pc_map[PCManagerJS.pc_id] = pc;
 	
 	// 调用pc_new方法创建java对象  ？应该用this调用还是原型调用
-	this.call_method('pc_new', PCManagerJS.pc_id, {});
+	var param = {};
+	param.pc_config = pc_config;
+	param.con = con;
+	this.call_method('pc_new', PCManagerJS.pc_id, param.toString());
 	
 	// 返回pc的id
 	return PCManagerJS.pc_id;
@@ -6715,4 +6720,6 @@ PCManagerJS.prototype.cb_method = function(method_name, pc_id, param_obj) {
 		PCManagerJS.pc_map[pc_id].onDataChannel(param_obj);break;	
 	}
 };
+
+window.pcManagerJS = window.pcManagerJS || new PCManagerJS();
 

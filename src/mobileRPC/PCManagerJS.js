@@ -61,12 +61,13 @@ PCManagerJS.prototype.cb_method = function(method_name, pc_id, param_obj) {
 		break;
 	case 'cb_getUserMedia':
 		// 根据传来的json对象，创造RTCMediaStream
+		console.log("cb_method -> cb_getUserMedia");
 		var localMediaStream = new RTCMediaStream();		
 		localMediaStream.pc_id = param_obj.pc_id;
 		localMediaStream.stream_type = 'local';
 		
 		// 调用webkitGetUserMedia的回调函数
-		webkitGetUserMedia.cb_getUserMedia(localMediaStream);
+		navigator.webkitGetUserMedia.cb_getUserMedia(localMediaStream);
 		break;		
 	case 'onSignalingChange':
 		// 根据传来的json对象，创造state

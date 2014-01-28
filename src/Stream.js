@@ -78,14 +78,14 @@ Erizo.Stream = function (spec) {
                 Erizo.GetUserMedia(opt, function (stream) {
                 //navigator.webkitGetUserMedia("audio, video", function (stream) {
 
-                    L.Logger.info("User has granted access to local media.");
+                    console.log("User has granted access to local media.");
                     that.stream = stream;
 
                     var streamEvent = Erizo.StreamEvent({type: "access-accepted"});
                     that.dispatchEvent(streamEvent);
 
                 }, function (error) {
-                    L.Logger.error("Failed to get access to local media. Error code was " + error.code + ".");
+                    console.log("Failed to get access to local media. Error code was " + error.code + ".");
                     var streamEvent = Erizo.StreamEvent({type: "access-denied"});
                     that.dispatchEvent(streamEvent);
                 });
