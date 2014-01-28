@@ -14,7 +14,7 @@ PCManagerJS._pc_id = 0;
 PCManagerJS.pc_id = "0";
 PCManagerJS.pc_map = {};
 
-PCManagerJS.prototype.pc_new = function(pc) {
+PCManagerJS.prototype.pc_new = function(pc, pc_config, con) {
 	// 生成pc的id
 	PCManagerJS._pc_id++;
 	PCManagerJS.pc_id = PCManagerJS._pc_id.toString();
@@ -23,7 +23,10 @@ PCManagerJS.prototype.pc_new = function(pc) {
 	PCManagerJS.pc_map[PCManagerJS.pc_id] = pc;
 	
 	// 调用pc_new方法创建java对象  ？应该用this调用还是原型调用
-	this.call_method('pc_new', PCManagerJS.pc_id, {});
+	var param = {};
+	param.pc_config = pc_config;
+	param.con = con;
+	this.call_method('pc_new', PCManagerJS.pc_id, param.toString());
 	
 	// 返回pc的id
 	return PCManagerJS.pc_id;

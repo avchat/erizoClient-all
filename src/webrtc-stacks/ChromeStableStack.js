@@ -40,6 +40,8 @@ Erizo.ChromeStableStack = function (spec) {
     that.roapSessionId = 103;
 
     that.peerConnection = new WebkitRTCPeerConnection(that.pc_config, that.con);
+    console.log(that.pc_config);
+    console.log(that.con);
 
     that.peerConnection.onicecandidate = function (event) {
         L.Logger.debug("PeerConnection: ", spec.session_id);
