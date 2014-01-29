@@ -74,7 +74,7 @@ Erizo.Stream = function (spec) {
                 if (spec.screen) {
                     opt = {video: {mandatory: {chromeMediaSource: 'screen', maxWidth: screen.availWidth, maxHeight: screen.availHeight}}};
                 }
-                L.Logger.debug(opt);
+                L.Logger.debug(JSON.stringify(opt));
                 Erizo.GetUserMedia(opt, function (stream) {
                 //navigator.webkitGetUserMedia("audio, video", function (stream) {
 

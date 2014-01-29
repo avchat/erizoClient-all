@@ -26,7 +26,7 @@ PCManagerJS.prototype.pc_new = function(pc, pc_config, con) {
 	var param = {};
 	param.pc_config = pc_config;
 	param.con = con;
-	this.call_method('pc_new', PCManagerJS.pc_id, param.toString());
+	this.call_method('pc_new', PCManagerJS.pc_id, param);
 	
 	// 返回pc的id
 	return PCManagerJS.pc_id;
@@ -61,6 +61,7 @@ PCManagerJS.prototype.cb_method = function(method_name, pc_id, param_obj) {
 		break;
 	case 'cb_getUserMedia':
 		// 根据传来的json对象，创造RTCMediaStream
+		L.Logger.debug("cb_method -> cb_getUserMedia!");
 		console.log("cb_method -> cb_getUserMedia");
 		var localMediaStream = new RTCMediaStream();		
 		localMediaStream.pc_id = param_obj.pc_id;
