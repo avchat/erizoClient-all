@@ -34,7 +34,7 @@ Erizo.EventDispatcher = function (spec) {
     // of event. All events are intended to be LicodeEvents.
     that.dispatchEvent = function (event) {
         var listener;
-        L.Logger.debug("Event: " + event.type);
+        console.log("Event: " + event.type);
         for (listener in spec.dispatcher.eventListeners[event.type]) {
             if (spec.dispatcher.eventListeners[event.type].hasOwnProperty(listener)) {
                 spec.dispatcher.eventListeners[event.type][listener](event);

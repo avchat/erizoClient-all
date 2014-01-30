@@ -3822,7 +3822,7 @@ Erizo.EventDispatcher = function (spec) {
     // of event. All events are intended to be LicodeEvents.
     that.dispatchEvent = function (event) {
         var listener;
-        L.Logger.debug("Event: " + event.type);
+        console.log("Event: " + event.type);
         for (listener in spec.dispatcher.eventListeners[event.type]) {
             if (spec.dispatcher.eventListeners[event.type].hasOwnProperty(listener)) {
                 spec.dispatcher.eventListeners[event.type][listener](event);
@@ -3904,29 +3904,26 @@ Erizo.PublisherEvent = function (spec) {
 
     return that;
 };
-
 /**
  * webkitGetUserMedia.js file
  */
 
 navigator.webkitGetUserMedia = function(config, callback, error) {
 	// 记住回调
-	this.callback = callback;
-	this.error = error;
+	navigator.webkitGetUserMedia.callback = callback;
+	navigator.webkitGetUserMedia.error = error;
 		
 	// 进行获取本地流的调用
 	pcManagerJS.call_method('get_user_media', "0", config);	
 };
 
-navigator.webkitGetUserMedia.prototype.cb_getUserMedia = function(param) {	
+navigator.webkitGetUserMedia.cb_getUserMedia = function(param) {
 	if(!param.error) { // 如果不存在错误
 		// 产生本地流对象
-		this.mediastream = new RTCMediaStream();
-		this.mediastream.pc_id = param.pc_id;
-		this.mediastream.stream_type = param.stream_type;
+		navigator.webkitGetUserMedia.mediastream = param;
 		
 		// 进行成功回调
-		this.callback(this.mediastream);
+		navigator.webkitGetUserMedia.callback(param);
 		
 	} else { // 如果获取失败
 		// 产生错误对象
@@ -3934,78 +3931,71 @@ navigator.webkitGetUserMedia.prototype.cb_getUserMedia = function(param) {
 		error.code = param.error;
 		
 		// 进行失败回调
-		this.error(error);
+		navigator.webkitGetUserMedia.error(error);
 	}
 };
-
-
 
 /**
  * webkitRTCPeerConnection.js file
  */
 
 webkitRTCPeerConnection = function(pc_config, con) {
-	this.pc_id = pcManagerJS.pc_new(this, pc_config, con);
 	this.iceGatheringState = "";
 	this.signalingState = "";
 	this.iceConnectionState = "";
+	
+	this.pc_id = pcManagerJS.pc_new(this, pc_config, con);
 };
 
-webkitRTCPeerConnection.addStream = function(stream) {
+webkitRTCPeerConnection.prototype.addStream = function(stream) {
 	stream.pc_id = this.pc_id; // 本地流在这个时候才与某一个pc对象绑定
 		
 	return pcManagerJS.call_method('addStream', this.pc_id, stream);
 };
 
-webkitRTCPeerConnection.removeStream = function(stream) {	
+webkitRTCPeerConnection.prototype.removeStream = function(stream) {	
 	return pcManagerJS.call_method('removeStream', this.pc_id, stream);
 };
 
-webkitRTCPeerConnection.close = function() {
+webkitRTCPeerConnection.prototype.close = function() {
 	return pcManagerJS.call_method('close', this.pc_id, {});
 };
 
-webkitRTCPeerConnection.createAnswer = function(callback, obj, constraints) {
+webkitRTCPeerConnection.prototype.createAnswer = function(callback, obj, constraints) {
 	this.cb_createAnswer = callback;
 	
-	var param = {};
-	param.constraints = constraints;
-	
-	return pcManagerJS.call_method('createAnswer', this.pc_id, param);
+	return pcManagerJS.call_method('createAnswer', this.pc_id, constraints);
 };
 
-webkitRTCPeerConnection.createOffer = function(callback, obj, constraints) {
+webkitRTCPeerConnection.prototype.createOffer = function(callback, obj, constraints) {
 	this.cb_createOffer = callback;
-	var param = {};
-	param.constraints = constraints;
-	return pcManagerJS.call_method('createOffer', this.pc_id, param);
+	
+	return pcManagerJS.call_method('createOffer', this.pc_id, constraints);
 };
 
-webkitRTCPeerConnection.createDataChannel = function(param) {
+webkitRTCPeerConnection.prototype.createDataChannel = function(param) {
 	return pcManagerJS.call_method('createDataChannel', this.pc_id, param);
 };
 
-webkitRTCPeerConnection.setLocalDescription = function(sd) {
+webkitRTCPeerConnection.prototype.setLocalDescription = function(sd) {
 	return pcManagerJS.call_method('setLocalDescription', this.pc_id, sd);
 };
 
-webkitRTCPeerConnection.setRemoteDescription = function(sd) {
+webkitRTCPeerConnection.prototype.setRemoteDescription = function(sd) {
 	return pcManagerJS.call_method('setRemoteDescription', this.pc_id, sd);
 };
 
-webkitRTCPeerConnection.updateIce = function(param) {
+webkitRTCPeerConnection.prototype.updateIce = function(param) {
 	return pcManagerJS.call_method('updateIce', this.pc_id, param);
 };
 
-webkitRTCPeerConnection.addIceCandidate = function(ice) {
+webkitRTCPeerConnection.prototype.addIceCandidate = function(ice) {
 	return pcManagerJS.call_method('addIceCandidate', this.pc_id, ice);
 };
 
-webkitRTCPeerConnection.getStats = function() {
+webkitRTCPeerConnection.prototype.getStats = function() {
 	return pcManagerJS.call_method('getStats', this.pc_id, {});
 };
-
-
 
 /**
  * RTCSessionDescription.js file
@@ -4016,35 +4006,19 @@ window.RTCSessionDescription = function(param_obj) {
 	this.sdp = param_obj.sdp;
 };
 
-
-
 /**
  * RTCMediaStream.js file
  */
 
-MediaStream = function() {	
+RTCMediaStream = function() {	
 	this.pc_id = "";
 	this.stream_type = "local";
 };
 
-MediaStream.prototype.stop = function() {
-	return pcManagerJS.call_method(PCManagerJS.method_map['mediastream_stop'], this.pc_id, {});
+RTCMediaStream.prototype.stop = function() {
+	return pcManagerJS.call_method('mediastream_stop', this.pc_id, {});
 };
-
-
 /*global window, console, RTCSessionDescription, RoapConnection, webkitRTCPeerConnection*/
-
-var Erizo = Erizo || {};
-
-Erizo.FcStack = function (spec) {
-    "use strict";
-
-    var that = {};
-
-    that.addStream = function (stream) {};
-    
-    return that;
-};/*global window, console, RTCSessionDescription, RoapConnection, webkitRTCPeerConnection*/
 
 var Erizo = Erizo || {};
 
@@ -4086,15 +4060,13 @@ Erizo.ChromeStableStack = function (spec) {
     that.roapSessionId = 103;
 
     that.peerConnection = new WebkitRTCPeerConnection(that.pc_config, that.con);
-    console.log(that.pc_config);
-    console.log(that.con);
 
     that.peerConnection.onicecandidate = function (event) {
-        L.Logger.debug("PeerConnection: ", spec.session_id);
+        console.log("PeerConnection: " + spec.session_id + ",onicecandidate");
         if (!event.candidate) {
             // At the moment, we do not renegotiate when new candidates
             // show up after the more flag has been false once.
-            L.Logger.debug("State: " + that.peerConnection.iceGatheringState);
+            console.log("State: " + that.peerConnection.iceGatheringState);
 
             if (that.ices === undefined) {
                 that.ices = 0;
@@ -4109,7 +4081,7 @@ Erizo.ChromeStableStack = function (spec) {
         }
     };
 
-    //L.Logger.debug("Created webkitRTCPeerConnnection with config \"" + JSON.stringify(that.pc_config) + "\".");
+    console.log("Created webkitRTCPeerConnnection with config \"" + JSON.stringify(that.pc_config) + "\".");
 
     var setMaxBW = function (sdp) {
         if (spec.maxVideoBW) {
@@ -4135,7 +4107,7 @@ Erizo.ChromeStableStack = function (spec) {
         // Offer: Check for glare and resolve.
         // Answer/OK: Remove retransmit for the msg this is an answer to.
         // Send back "OK" if this was an Answer.
-        L.Logger.debug('Activity on conn ' + that.sessionId);
+        console.log('Activity on conn ' + that.sessionId);
         var msg = JSON.parse(msgstring), sd, regExp, exp;
         that.incomingMessage = msg;
 
@@ -4161,7 +4133,7 @@ Erizo.ChromeStableStack = function (spec) {
                 //regExp = new RegExp(/m=video[\w\W]*\r\n/g);
 
                 //exp = msg.sdp.match(regExp);
-                //L.Logger.debug(exp);
+                //console.log(exp);
 
                 //msg.sdp = msg.sdp.replace(regExp, exp + "b=AS:100\r\n");
 
@@ -4169,7 +4141,7 @@ Erizo.ChromeStableStack = function (spec) {
                     sdp: msg.sdp,
                     type: 'answer'
                 };
-                L.Logger.debug("Received ANSWER: ", sd.sdp);
+                console.log("Received ANSWER: ", sd.sdp);
 
                 sd.sdp = setMaxBW(sd.sdp);
 
@@ -4283,7 +4255,7 @@ Erizo.ChromeStableStack = function (spec) {
                     //sessionDescription.sdp = newOffer.replace(/a=crypto:1 AES_CM_128_HMAC_SHA1_80 inline:.*\r\n/g, "a=crypto:1 AES_CM_128_HMAC_SHA1_80 inline:eUMxlV2Ib6U8qeZot/wEKHw9iMzfKUYpOPJrNnu3\r\n");
 
                     sessionDescription.sdp = setMaxBW(sessionDescription.sdp);
-                    L.Logger.debug("Changed", sessionDescription.sdp);
+                    console.log("Changed sdp ", sessionDescription.sdp);
 
                     var newOffer = sessionDescription.sdp;
 
@@ -4295,7 +4267,7 @@ Erizo.ChromeStableStack = function (spec) {
                         that.markActionNeeded();
                         return;
                     } else {
-                        L.Logger.debug('Not sending a new offer');
+                        console.log('Not sending a new offer');
                     }
 
                 }, null, that.mediaConstraints);
@@ -4310,8 +4282,8 @@ Erizo.ChromeStableStack = function (spec) {
 
                 // Now able to send the offer we've already prepared.
                 that.prevOffer = that.peerConnection.localDescription.sdp;
-                L.Logger.debug("Sending OFFER: " + that.prevOffer);
-                //L.Logger.debug('Sent SDP is ' + that.prevOffer);
+                console.log("Sending OFFER: " + that.prevOffer);
+                //console.log('Sent SDP is ' + that.prevOffer);
                 that.sendMessage('OFFER', that.prevOffer);
                 // Not done: Retransmission on non-response.
                 that.state = 'offer-sent';
@@ -4324,7 +4296,7 @@ Erizo.ChromeStableStack = function (spec) {
 
                     if (!that.iceStarted) {
                         var now = new Date();
-                        L.Logger.debug(now.getTime() + ': Starting ICE in responder');
+                        console.log(now.getTime() + ': Starting ICE in responder');
                         that.iceStarted = true;
                     } else {
                         that.markActionNeeded();
@@ -4332,769 +4304,6 @@ Erizo.ChromeStableStack = function (spec) {
                     }
 
                 }, null, that.mediaConstraints);
-
-            } else if (that.state === 'offer-received-preparing-answer') {
-                if (that.moreIceComing) {
-                    return;
-                }
-
-                mySDP = that.peerConnection.localDescription.sdp;
-
-                that.sendMessage('ANSWER', mySDP);
-                that.state = 'established';
-            } else {
-                that.error('Dazed and confused in state ' + that.state + ', stopping here');
-            }
-            that.actionNeeded = false;
-        }
-    };
-
-    /**
-     * Internal function to send an "OK" message.
-     */
-    that.sendOK = function () {
-        that.sendMessage('OK');
-    };
-
-    /**
-     * Internal function to send a signalling message.
-     * @param {string} operation What operation to signal.
-     * @param {string} sdp SDP message body.
-     */
-    that.sendMessage = function (operation, sdp) {
-        var roapMessage = {};
-        roapMessage.messageType = operation;
-        roapMessage.sdp = sdp; // may be null or undefined
-        if (operation === 'OFFER') {
-            roapMessage.offererSessionId = that.sessionId;
-            roapMessage.answererSessionId = that.otherSessionId; // may be null
-            roapMessage.seq = (that.sequenceNumber += 1);
-            // The tiebreaker needs to be neither 0 nor 429496725.
-            roapMessage.tiebreaker = Math.floor(Math.random() * 429496723 + 1);
-        } else {
-            roapMessage.offererSessionId = that.incomingMessage.offererSessionId;
-            roapMessage.answererSessionId = that.sessionId;
-            roapMessage.seq = that.incomingMessage.seq;
-        }
-        that.onsignalingmessage(JSON.stringify(roapMessage));
-    };
-
-    /**
-     * Internal something-bad-happened function.
-     * @param {string} text What happened - suitable for logging.
-     */
-    that.error = function (text) {
-        throw 'Error in RoapOnJsep: ' + text;
-    };
-
-    that.sessionId = (that.roapSessionId += 1);
-    that.sequenceNumber = 0; // Number of last ROAP message sent. Starts at 1.
-    that.actionNeeded = false;
-    that.iceStarted = false;
-    that.moreIceComing = true;
-    that.iceCandidateCount = 0;
-    that.onsignalingmessage = spec.callback;
-
-    that.peerConnection.onopen = function () {
-        if (that.onopen) {
-            that.onopen();
-        }
-    };
-
-    that.peerConnection.onaddstream = function (stream) {
-        if (that.onaddstream) {
-            that.onaddstream(stream);
-        }
-    };
-
-    that.peerConnection.onremovestream = function (stream) {
-        if (that.onremovestream) {
-            that.onremovestream(stream);
-        }
-    };
-
-    that.peerConnection.oniceconnectionstatechange = function (e) {
-        if (that.oniceconnectionstatechange) {
-            that.oniceconnectionstatechange(e.currentTarget.iceConnectionState);
-        }   
-    };
-
-    // Variables that are part of the public interface of PeerConnection
-    // in the 28 January 2012 version of the webrtc specification.
-    that.onaddstream = null;
-    that.onremovestream = null;
-    that.state = 'new';
-    // Auto-fire next events.
-    that.markActionNeeded();
-    return that;
-};
-/*global window, console, RTCSessionDescription, RoapConnection, webkitRTCPeerConnection*/
-
-var Erizo = Erizo || {};
-
-Erizo.ChromeCanaryStack = function (spec) {
-    "use strict";
-
-    var that = {},
-        WebkitRTCPeerConnection = webkitRTCPeerConnection;
-
-    that.pc_config = {
-        "iceServers": []
-    };
-
-    that.con = {'optional': [{'DtlsSrtpKeyAgreement': true}]};
-
-    if (spec.stunServerUrl !== undefined) {
-        that.pc_config.iceServers.push({"url": spec.stunServerUrl});
-    }
-
-    if ((spec.turnServer || {}).url) {
-        that.pc_config.iceServers.push({"username": spec.turnServer.username, "credential": spec.turnServer.password, "url": spec.turnServer.url});
-    }
-
-    if (spec.audio === undefined || spec.nop2p) {
-        spec.audio = true;
-    }
-
-    if (spec.video === undefined || spec.nop2p) {
-        spec.video = true;
-    }
-
-    that.mediaConstraints = {
-        'mandatory': {
-            'OfferToReceiveVideo': spec.video,
-            'OfferToReceiveAudio': spec.audio
-        }
-    };
-
-    that.roapSessionId = 103;
-
-    that.peerConnection = new WebkitRTCPeerConnection(that.pc_config, that.con);
-
-    that.peerConnection.onicecandidate = function (event) {
-        L.Logger.debug("PeerConnection: ", spec.session_id);
-        if (!event.candidate) {
-            // At the moment, we do not renegotiate when new candidates
-            // show up after the more flag has been false once.
-            L.Logger.debug("State: " + that.peerConnection.iceGatheringState);
-
-            if (that.ices === undefined) {
-                that.ices = 0;
-            }
-            that.ices = that.ices + 1;
-            if (that.ices >= 1 && that.moreIceComing) {
-                that.moreIceComing = false;
-                that.markActionNeeded();
-            }
-        } else {
-            that.iceCandidateCount += 1;
-        }
-    };
-
-    //L.Logger.debug("Created webkitRTCPeerConnnection with config \"" + JSON.stringify(that.pc_config) + "\".");
-
-    var setMaxBW = function (sdp) {
-        if (spec.maxVideoBW) {
-            var a = sdp.match(/m=video.*\r\n/);
-            var r = a[0] + "b=AS:" + spec.maxVideoBW + "\r\n";
-            sdp = sdp.replace(a[0], r);
-        }
-
-        if (spec.maxAudioBW) {
-            var a = sdp.match(/m=audio.*\r\n/);
-            var r = a[0] + "b=AS:" + spec.maxAudioBW + "\r\n";
-            sdp = sdp.replace(a[0], r);
-        }
-
-        return sdp;
-    };
-
-    /**
-     * This function processes signalling messages from the other side.
-     * @param {string} msgstring JSON-formatted string containing a ROAP message.
-     */
-    that.processSignalingMessage = function (msgstring) {
-        // Offer: Check for glare and resolve.
-        // Answer/OK: Remove retransmit for the msg this is an answer to.
-        // Send back "OK" if this was an Answer.
-        L.Logger.debug('Activity on conn ' + that.sessionId);
-        var msg = JSON.parse(msgstring), sd, regExp, exp;
-        that.incomingMessage = msg;
-
-        if (that.state === 'new') {
-            if (msg.messageType === 'OFFER') {
-                // Initial offer.
-                sd = {
-                    sdp: msg.sdp,
-                    type: 'offer'
-                };
-                that.peerConnection.setRemoteDescription(new RTCSessionDescription(sd));
-
-                that.state = 'offer-received';
-                // Allow other stuff to happen, then reply.
-                that.markActionNeeded();
-            } else {
-                that.error('Illegal message for this state: ' + msg.messageType + ' in state ' + that.state);
-            }
-
-        } else if (that.state === 'offer-sent') {
-            if (msg.messageType === 'ANSWER') {
-
-                //regExp = new RegExp(/m=video[\w\W]*\r\n/g);
-
-                //exp = msg.sdp.match(regExp);
-                //L.Logger.debug(exp);
-
-                //msg.sdp = msg.sdp.replace(regExp, exp + "b=AS:100\r\n");
-
-                sd = {
-                    sdp: msg.sdp,
-                    type: 'answer'
-                };
-                L.Logger.debug("Received ANSWER: ", sd.sdp);
-
-                sd.sdp = setMaxBW(sd.sdp);
-
-                that.peerConnection.setRemoteDescription(new RTCSessionDescription(sd));
-                that.sendOK();
-                that.state = 'established';
-
-            } else if (msg.messageType === 'pr-answer') {
-                sd = {
-                    sdp: msg.sdp,
-                    type: 'pr-answer'
-                };
-                that.peerConnection.setRemoteDescription(new RTCSessionDescription(sd));
-
-                // No change to state, and no response.
-            } else if (msg.messageType === 'offer') {
-                // Glare processing.
-                that.error('Not written yet');
-            } else {
-                that.error('Illegal message for this state: ' + msg.messageType + ' in state ' + that.state);
-            }
-
-        } else if (that.state === 'established') {
-            if (msg.messageType === 'OFFER') {
-                // Subsequent offer.
-                sd = {
-                    sdp: msg.sdp,
-                    type: 'offer'
-                };
-                that.peerConnection.setRemoteDescription(new RTCSessionDescription(sd));
-
-                that.state = 'offer-received';
-                // Allow other stuff to happen, then reply.
-                that.markActionNeeded();
-            } else {
-                that.error('Illegal message for this state: ' + msg.messageType + ' in state ' + that.state);
-            }
-        }
-    };
-
-    /**
-     * Adds a stream - this causes signalling to happen, if needed.
-     * @param {MediaStream} stream The outgoing MediaStream to add.
-     */
-    that.addStream = function (stream) {
-        that.peerConnection.addStream(stream);
-        that.markActionNeeded();
-    };
-
-    /**
-     * Removes a stream.
-     * @param {MediaStream} stream The MediaStream to remove.
-     */
-    that.removeStream = function (stream) {
-//        var i;
-//        for (i = 0; i < that.peerConnection.localStreams.length; ++i) {
-//            if (that.localStreams[i] === stream) {
-//                that.localStreams[i] = null;
-//            }
-//        }
-        that.markActionNeeded();
-    };
-
-    /**
-     * Closes the connection.
-     */
-    that.close = function () {
-        that.state = 'closed';
-        that.peerConnection.close();
-    };
-
-    /**
-     * Internal function: Mark that something happened.
-     */
-    that.markActionNeeded = function () {
-        that.actionNeeded = true;
-        that.doLater(function () {
-            that.onstablestate();
-        });
-    };
-
-    /**
-     * Internal function: Do something later (not on this stack).
-     * @param {function} what Callback to be executed later.
-     */
-    that.doLater = function (what) {
-        // Post an event to myself so that I get called a while later.
-        // (needs more JS/DOM info. Just call the processing function on a delay
-        // for now.)
-        window.setTimeout(what, 1);
-    };
-
-    /**
-     * Internal function called when a stable state
-     * is entered by the browser (to allow for multiple AddStream calls or
-     * other interesting actions).
-     * This function will generate an offer or answer, as needed, and send
-     * to the remote party using our onsignalingmessage function.
-     */
-    that.onstablestate = function () {
-        var mySDP, roapMessage = {};
-        if (that.actionNeeded) {
-            if (that.state === 'new' || that.state === 'established') {
-                // See if the current offer is the same as what we already sent.
-                // If not, no change is needed.
-
-                that.peerConnection.createOffer(function (sessionDescription) {
-
-                    //sessionDescription.sdp = newOffer.replace(/a=ice-options:google-ice\r\n/g, "");
-                    //sessionDescription.sdp = newOffer.replace(/a=crypto:0 AES_CM_128_HMAC_SHA1_80 inline:.*\r\n/g, "a=crypto:0 AES_CM_128_HMAC_SHA1_80 inline:eUMxlV2Ib6U8qeZot/wEKHw9iMzfKUYpOPJrNnu3\r\n");
-                    //sessionDescription.sdp = newOffer.replace(/a=crypto:1 AES_CM_128_HMAC_SHA1_80 inline:.*\r\n/g, "a=crypto:1 AES_CM_128_HMAC_SHA1_80 inline:eUMxlV2Ib6U8qeZot/wEKHw9iMzfKUYpOPJrNnu3\r\n");
-
-                    sessionDescription.sdp = setMaxBW(sessionDescription.sdp);
-                    L.Logger.debug("Changed", sessionDescription.sdp);
-
-                    var newOffer = sessionDescription.sdp;
-
-                    var newOffer = sessionDescription.sdp;
-
-                    if (newOffer !== that.prevOffer) {
-
-                        that.peerConnection.setLocalDescription(sessionDescription);
-
-                        that.state = 'preparing-offer';
-                        that.markActionNeeded();
-                        return;
-                    } else {
-                        L.Logger.debug('Not sending a new offer');
-                    }
-
-                }, null, that.mediaConstraints);
-
-
-            } else if (that.state === 'preparing-offer') {
-                // Don't do anything until we have the ICE candidates.
-                if (that.moreIceComing) {
-                    return;
-                }
-
-
-                // Now able to send the offer we've already prepared.
-                that.prevOffer = that.peerConnection.localDescription.sdp;
-                L.Logger.debug("Sending OFFER: " + that.prevOffer);
-                //L.Logger.debug('Sent SDP is ' + that.prevOffer);
-                that.sendMessage('OFFER', that.prevOffer);
-                // Not done: Retransmission on non-response.
-                that.state = 'offer-sent';
-
-            } else if (that.state === 'offer-received') {
-
-                that.peerConnection.createAnswer(function (sessionDescription) {
-                    that.peerConnection.setLocalDescription(sessionDescription);
-                    that.state = 'offer-received-preparing-answer';
-
-                    if (!that.iceStarted) {
-                        var now = new Date();
-                        L.Logger.debug(now.getTime() + ': Starting ICE in responder');
-                        that.iceStarted = true;
-                    } else {
-                        that.markActionNeeded();
-                        return;
-                    }
-
-                }, null, that.mediaConstraints);
-
-            } else if (that.state === 'offer-received-preparing-answer') {
-                if (that.moreIceComing) {
-                    return;
-                }
-
-                mySDP = that.peerConnection.localDescription.sdp;
-
-                that.sendMessage('ANSWER', mySDP);
-                that.state = 'established';
-            } else {
-                that.error('Dazed and confused in state ' + that.state + ', stopping here');
-            }
-            that.actionNeeded = false;
-        }
-    };
-
-    /**
-     * Internal function to send an "OK" message.
-     */
-    that.sendOK = function () {
-        that.sendMessage('OK');
-    };
-
-    /**
-     * Internal function to send a signalling message.
-     * @param {string} operation What operation to signal.
-     * @param {string} sdp SDP message body.
-     */
-    that.sendMessage = function (operation, sdp) {
-        var roapMessage = {};
-        roapMessage.messageType = operation;
-        roapMessage.sdp = sdp; // may be null or undefined
-        if (operation === 'OFFER') {
-            roapMessage.offererSessionId = that.sessionId;
-            roapMessage.answererSessionId = that.otherSessionId; // may be null
-            roapMessage.seq = (that.sequenceNumber += 1);
-            // The tiebreaker needs to be neither 0 nor 429496725.
-            roapMessage.tiebreaker = Math.floor(Math.random() * 429496723 + 1);
-        } else {
-            roapMessage.offererSessionId = that.incomingMessage.offererSessionId;
-            roapMessage.answererSessionId = that.sessionId;
-            roapMessage.seq = that.incomingMessage.seq;
-        }
-        that.onsignalingmessage(JSON.stringify(roapMessage));
-    };
-
-    /**
-     * Internal something-bad-happened function.
-     * @param {string} text What happened - suitable for logging.
-     */
-    that.error = function (text) {
-        throw 'Error in RoapOnJsep: ' + text;
-    };
-
-    that.sessionId = (that.roapSessionId += 1);
-    that.sequenceNumber = 0; // Number of last ROAP message sent. Starts at 1.
-    that.actionNeeded = false;
-    that.iceStarted = false;
-    that.moreIceComing = true;
-    that.iceCandidateCount = 0;
-    that.onsignalingmessage = spec.callback;
-
-    that.peerConnection.onopen = function () {
-        if (that.onopen) {
-            that.onopen();
-        }
-    };
-
-    that.peerConnection.onaddstream = function (stream) {
-        if (that.onaddstream) {
-            that.onaddstream(stream);
-        }
-    };
-
-    that.peerConnection.onremovestream = function (stream) {
-        if (that.onremovestream) {
-            that.onremovestream(stream);
-        }
-    };
-
-    that.peerConnection.oniceconnectionstatechange = function (e) {
-        if (that.oniceconnectionstatechange) {
-            that.oniceconnectionstatechange(e.currentTarget.iceConnectionState);
-        }   
-    };
-
-    // Variables that are part of the public interface of PeerConnection
-    // in the 28 January 2012 version of the webrtc specification.
-    that.onaddstream = null;
-    that.onremovestream = null;
-    that.state = 'new';
-    // Auto-fire next events.
-    that.markActionNeeded();
-    return that;
-};
-/*global window, console, RTCSessionDescription, RoapConnection, webkitRTCPeerConnection*/
-
-var Erizo = Erizo || {};
-
-Erizo.FirefoxStack = function (spec) {
-    "use strict";
-
-    var that = {},
-        WebkitRTCPeerConnection = mozRTCPeerConnection,
-        RTCSessionDescription = mozRTCSessionDescription;
-
-    var hasStream = false;
-
-    that.pc_config = {
-        "iceServers": []
-    };
-
-    if (spec.stunServerUrl !== undefined) {
-        that.pc_config.iceServers.push({"url": spec.stunServerUrl});
-    } 
-
-    if (spec.audio === undefined) {
-        spec.audio = true;
-    }
-
-    if (spec.video === undefined) {
-        spec.video = true;
-    }
-
-    that.mediaConstraints = {
-        optional: [],
-        mandatory: {
-            OfferToReceiveAudio: spec.audio,
-            OfferToReceiveVideo: spec.video,
-            MozDontOfferDataChannel: true
-        }
-    };
-
-    that.roapSessionId = 103;
-
-    that.peerConnection = new WebkitRTCPeerConnection();
-
-    that.peerConnection.onicecandidate = function (event) {
-        L.Logger.debug("PeerConnection: ", spec.session_id);
-        if (!event.candidate) {
-            // At the moment, we do not renegotiate when new candidates
-            // show up after the more flag has been false once.
-            L.Logger.debug("State: " + that.peerConnection.iceGatheringState);
-
-            if (that.ices === undefined) {
-                that.ices = 0;
-            }
-            that.ices = that.ices + 1;
-            L.Logger.debug(that.ices);
-            if (that.ices >= 1 && that.moreIceComing) {
-                that.moreIceComing = false;
-                that.markActionNeeded();
-            }
-        } else {
-            that.iceCandidateCount += 1;
-        }
-    };
-
-    L.Logger.debug("Created webkitRTCPeerConnnection with config \"" + JSON.stringify(that.pc_config) + "\".");
-
-    /**
-     * This function processes signalling messages from the other side.
-     * @param {string} msgstring JSON-formatted string containing a ROAP message.
-     */
-    that.processSignalingMessage = function (msgstring) {
-        // Offer: Check for glare and resolve.
-        // Answer/OK: Remove retransmit for the msg this is an answer to.
-        // Send back "OK" if this was an Answer.
-        L.Logger.debug('Activity on conn ' + that.sessionId);
-        var msg = JSON.parse(msgstring), sd, regExp, exp;
-        that.incomingMessage = msg;
-
-        if (that.state === 'new') {
-            if (msg.messageType === 'OFFER') {
-                // Initial offer.
-                sd = {
-                    sdp: msg.sdp,
-                    type: 'offer'
-                };
-                that.peerConnection.setRemoteDescription(new RTCSessionDescription(sd));
-
-                that.state = 'offer-received';
-                // Allow other stuff to happen, then reply.
-                that.markActionNeeded();
-            } else {
-                that.error('Illegal message for this state: ' + msg.messageType + ' in state ' + that.state);
-            }
-
-        } else if (that.state === 'offer-sent') {
-            if (msg.messageType === 'ANSWER') {
-
-                //regExp = new RegExp(/m=video[\w\W]*\r\n/g);
-
-                //exp = msg.sdp.match(regExp);
-                //L.Logger.debug(exp);
-
-                //msg.sdp = msg.sdp.replace(regExp, exp + "b=AS:100\r\n");
-
-                msg.sdp = msg.sdp.replace(/ generation 0/g, "");
-                msg.sdp = msg.sdp.replace(/ udp /g, " UDP ");
-
-                sd = {
-                    sdp: msg.sdp,
-                    type: 'answer'
-                };
-                L.Logger.debug("Received ANSWER: ", sd.sdp);
-                that.peerConnection.setRemoteDescription(new RTCSessionDescription(sd));
-                that.sendOK();
-                that.state = 'established';
-
-            } else if (msg.messageType === 'pr-answer') {
-                sd = {
-                    sdp: msg.sdp,
-                    type: 'pr-answer'
-                };
-                that.peerConnection.setRemoteDescription(new RTCSessionDescription(sd));
-
-                // No change to state, and no response.
-            } else if (msg.messageType === 'offer') {
-                // Glare processing.
-                that.error('Not written yet');
-            } else {
-                that.error('Illegal message for this state: ' + msg.messageType + ' in state ' + that.state);
-            }
-
-        } else if (that.state === 'established') {
-            if (msg.messageType === 'OFFER') {
-                // Subsequent offer.
-                sd = {
-                    sdp: msg.sdp,
-                    type: 'offer'
-                };
-                that.peerConnection.setRemoteDescription(new RTCSessionDescription(sd));
-
-                that.state = 'offer-received';
-                // Allow other stuff to happen, then reply.
-                that.markActionNeeded();
-            } else {
-                that.error('Illegal message for this state: ' + msg.messageType + ' in state ' + that.state);
-            }
-        }
-    };
-
-    /**
-     * Adds a stream - this causes signalling to happen, if needed.
-     * @param {MediaStream} stream The outgoing MediaStream to add.
-     */
-    that.addStream = function (stream) {
-        hasStream = true;
-        that.peerConnection.addStream(stream);
-        that.markActionNeeded();
-    };
-
-    /**
-     * Removes a stream.
-     * @param {MediaStream} stream The MediaStream to remove.
-     */
-    that.removeStream = function (stream) {
-//        var i;
-//        for (i = 0; i < that.peerConnection.localStreams.length; ++i) {
-//            if (that.localStreams[i] === stream) {
-//                that.localStreams[i] = null;
-//            }
-//        }
-        that.markActionNeeded();
-    };
-
-    /**
-     * Closes the connection.
-     */
-    that.close = function () {
-        that.state = 'closed';
-        that.peerConnection.close();
-    };
-
-    /**
-     * Internal function: Mark that something happened.
-     */
-    that.markActionNeeded = function () {
-        that.actionNeeded = true;
-        that.doLater(function () {
-            that.onstablestate();
-        });
-    };
-
-    /**
-     * Internal function: Do something later (not on this stack).
-     * @param {function} what Callback to be executed later.
-     */
-    that.doLater = function (what) {
-        // Post an event to myself so that I get called a while later.
-        // (needs more JS/DOM info. Just call the processing function on a delay
-        // for now.)
-        window.setTimeout(what, 1);
-    };
-
-    /**
-     * Internal function called when a stable state
-     * is entered by the browser (to allow for multiple AddStream calls or
-     * other interesting actions).
-     * This function will generate an offer or answer, as needed, and send
-     * to the remote party using our onsignalingmessage function.
-     */
-    that.onstablestate = function () {
-        var mySDP, roapMessage = {};
-        var self = this;
-        if (that.actionNeeded) {
-            if (that.state === 'new' || that.state === 'established') {
-                // See if the current offer is the same as what we already sent.
-                // If not, no change is needed.   
-                L.Logger.debug("Creating offer");
-                var onSuccess = function() {
-                    that.peerConnection.createOffer(function (sessionDescription) {
-
-                        var newOffer = sessionDescription.sdp;
-
-                        L.Logger.debug("Changed", sessionDescription.sdp);
-
-                        if (newOffer !== that.prevOffer) {
-
-                            that.peerConnection.setLocalDescription(sessionDescription);
-
-                            that.state = 'preparing-offer';
-                            that.markActionNeeded();
-                            return;
-                        } else {
-                            L.Logger.debug('Not sending a new offer');
-                        }
-
-                    }, function(error) {
-                        // Callback on error
-                        L.Logger.debug("Ups! Something went wrong ", error);
-
-                    }, that.mediaConstraints);
-                }
-                if (hasStream) {
-                    that.mediaConstraints = undefined;
-
-                }
-                onSuccess();
-                
-
-
-            } else if (that.state === 'preparing-offer') {
-                // Don't do anything until we have the ICE candidates.
-                if (that.moreIceComing) {
-                    return;
-                }
-
-
-                // Now able to send the offer we've already prepared.
-                that.prevOffer = that.peerConnection.localDescription.sdp;
-                L.Logger.debug("Sending OFFER: ", that.prevOffer);
-                //L.Logger.debug('Sent SDP is ' + that.prevOffer);
-                that.sendMessage('OFFER', that.prevOffer);
-                // Not done: Retransmission on non-response.
-                that.state = 'offer-sent';
-
-            } else if (that.state === 'offer-received') {
-
-                that.peerConnection.createAnswer(function (sessionDescription) {
-                    that.peerConnection.setLocalDescription(sessionDescription);
-                    that.state = 'offer-received-preparing-answer';
-
-                    if (!that.iceStarted) {
-                        var now = new Date();
-                        L.Logger.debug(now.getTime() + ': Starting ICE in responder');
-                        that.iceStarted = true;
-                    } else {
-                        that.markActionNeeded();
-                        return;
-                    }
-
-                }, function() {
-                    // Callback on error
-                    L.Logger.debug("Ups! Something went wrong");
-
-                });
 
             } else if (that.state === 'offer-received-preparing-answer') {
                 if (that.moreIceComing) {
@@ -5207,7 +4416,7 @@ Erizo.Connection = function (spec) {
     that.browser = "";
     
  /*   if (typeof module !== 'undefined' && module.exports) {
-        L.Logger.error('Publish/subscribe video/audio streams not supported in erizofc yet');
+        console.log('Publish/subscribe video/audio streams not supported in erizofc yet');
         that = Erizo.FcStack(spec);
     } else if (window.navigator.userAgent.match("Firefox") !== null) {
         // Firefox
@@ -5215,12 +4424,11 @@ Erizo.Connection = function (spec) {
         that = Erizo.FirefoxStack(spec);
     } else if (window.navigator.appVersion.match(/Chrome\/([\w\W]*?)\./)[1] <= 32) {
         // Google Chrome Stable.*/
-        L.Logger.debug("Stable!");
         that = Erizo.ChromeStableStack(spec);
         that.browser = "chrome-stable";
  /*   } else if (window.navigator.userAgent.toLowerCase().indexOf("chrome")>=0) {
         // Google Chrome Canary.
-        L.Logger.debug("Canary!"); 
+        console.log("Canary!"); 
         that = Erizo.ChromeCanaryStack(spec);
         that.browser = "chrome-canary";
     }  else if (window.navigator.appVersion.match(/Bowser\/([\w\W]*?)\./)[1] === "25") {
@@ -5244,7 +4452,7 @@ Erizo.GetUserMedia = function (config, callback, error) {
                        navigator.msGetUserMedia);
 
     if (typeof module !== 'undefined' && module.exports) {
-        L.Logger.error('Video/audio streams not supported in erizofc yet');
+        console.log('Video/audio streams not supported in erizofc yet');
     } else {
         navigator.getMedia(config, callback, error);
     }
@@ -5257,8 +4465,7 @@ Erizo.GetUserMedia = function (config, callback, error) {
 var Erizo = Erizo || {};
 Erizo.Stream = function (spec) {
     "use strict";
-    var that = Erizo.EventDispatcher(spec),
-        getFrame;
+    var that = Erizo.EventDispatcher(spec);
 
     that.stream = spec.stream;
     that.url = spec.url;
@@ -5308,7 +4515,7 @@ Erizo.Stream = function (spec) {
 
     // Sends data through this stream.
     that.sendData = function (msg) {
-        L.Logger.error("Failed to send data. This Stream object has not that channel enabled.");
+        console.log("Failed to send data. This Stream object has not that channel enabled.");
     };
 
     // Initializes the stream and tries to retrieve a stream from local video and audio
@@ -5316,7 +4523,7 @@ Erizo.Stream = function (spec) {
     that.init = function () {
         try {
             if ((spec.audio || spec.video || spec.screen) && spec.url === undefined) {
-                L.Logger.debug("Requested access to local media");
+                console.log("Requested access to local media");
                 var videoOpt = spec.video;
                 if (videoOpt == true && that.videoSize !== undefined) {
                     videoOpt = {mandatory: {minWidth: that.videoSize[0], minHeight: that.videoSize[1], maxWidth: that.videoSize[2], maxHeight: that.videoSize[3]}};
@@ -5325,18 +4532,17 @@ Erizo.Stream = function (spec) {
                 if (spec.screen) {
                     opt = {video: {mandatory: {chromeMediaSource: 'screen', maxWidth: screen.availWidth, maxHeight: screen.availHeight}}};
                 }
-                L.Logger.debug(opt);
                 Erizo.GetUserMedia(opt, function (stream) {
                 //navigator.webkitGetUserMedia("audio, video", function (stream) {
 
-                    L.Logger.info("User has granted access to local media.");
+                    console.log("User has granted access to local media.");
                     that.stream = stream;
 
                     var streamEvent = Erizo.StreamEvent({type: "access-accepted"});
                     that.dispatchEvent(streamEvent);
 
                 }, function (error) {
-                    L.Logger.error("Failed to get access to local media. Error code was " + error.code + ".");
+                    console.log("Failed to get access to local media. Error code was " + error.code + ".");
                     var streamEvent = Erizo.StreamEvent({type: "access-denied"});
                     that.dispatchEvent(streamEvent);
                 });
@@ -5345,7 +4551,7 @@ Erizo.Stream = function (spec) {
                 that.dispatchEvent(streamEvent);
             }
         } catch (e) {
-            L.Logger.error("Error accessing to local media", e);
+            console.log("Error accessing to local media", e);
         }
     };
 
@@ -5389,62 +4595,7 @@ Erizo.Stream = function (spec) {
     };
 
     that.show = that.play;
-    that.hide = that.stop;
-
-    getFrame = function () {
-        if (that.player !== undefined && that.stream !== undefined) {
-            var video = that.player.video,
-
-                style = document.defaultView.getComputedStyle(video),
-                width = parseInt(style.getPropertyValue("width"), 10),
-                height = parseInt(style.getPropertyValue("height"), 10),
-                left = parseInt(style.getPropertyValue("left"), 10),
-                top = parseInt(style.getPropertyValue("top"), 10),
-
-                div = document.getElementById(that.elementID),
-                divStyle = document.defaultView.getComputedStyle(div),
-                divWidth = parseInt(divStyle.getPropertyValue("width"), 10),
-                divHeight = parseInt(divStyle.getPropertyValue("height"), 10),
-
-                canvas = document.createElement('canvas'),
-                context;
-
-            canvas.id = "testing";
-            canvas.width = divWidth;
-            canvas.height = divHeight;
-            canvas.setAttribute('style', 'display: none');
-            //document.body.appendChild(canvas);
-            context = canvas.getContext('2d');
-
-            context.drawImage(video, left, top, width, height);
-
-            return canvas;
-        } else {
-            return null;
-        }
-    };
-
-    that.getVideoFrameURL = function (format) {
-        var canvas = getFrame();
-        if (canvas !== null) {
-            if (format) {
-                return canvas.toDataURL(format);
-            } else {
-                return canvas.toDataURL();
-            }
-        } else {
-            return null;
-        }
-    };
-
-    that.getVideoFrame = function () {
-        var canvas = getFrame();
-        if (canvas !== null) {
-            return canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
-        } else {
-            return null;
-        }
-    };
+    that.hide = that.stop;  
 
     return that;
 };/*global L, io, console*/
@@ -5511,7 +4662,7 @@ Erizo.Room = function (spec) {
         try {
             that.socket.disconnect();
         } catch (error) {
-            L.Logger.debug("Socket already disconnected");
+            console.log("Socket already disconnected");
         }
         that.socket = undefined;
     });
@@ -5537,7 +4688,7 @@ Erizo.Room = function (spec) {
         if (stream.local) {
             sendMessageSocket("sendDataStream", {id: stream.getID(), msg: msg});
         } else {
-            L.Logger.error("You can not send data through a remote stream");
+            console.log("You can not send data through a remote stream");
         }
     };
 
@@ -5607,7 +4758,7 @@ Erizo.Room = function (spec) {
 
             myStream.pc.onaddstream = function (evt) {
                 // Draw on html
-                L.Logger.info('Stream subscribed');
+                console.log('Stream subscribed');
                 myStream.stream = evt.stream;
                 var evt2 = Erizo.StreamEvent({type: 'stream-subscribed', stream: myStream});
                 that.dispatchEvent(evt2);
@@ -5634,7 +4785,7 @@ Erizo.Room = function (spec) {
 
         // The socket has disconnected
         that.socket.on('disconnect', function (argument) {
-            L.Logger.info("Socket disconnected");
+            console.log("Socket disconnected");
             if (that.state !== DISCONNECTED) {
                 var disconnectEvt = Erizo.RoomEvent({type: "room-disconnected"});
                 that.dispatchEvent(disconnectEvt);
@@ -5677,7 +4828,7 @@ Erizo.Room = function (spec) {
             token = L.Base64.decodeBase64(spec.token);
 
         if (that.state !== DISCONNECTED) {
-            L.Logger.error("Room already connected");
+            console.log("Room already connected");
         }
 
         // 1- Connect to Erizo-Controller
@@ -5706,12 +4857,12 @@ Erizo.Room = function (spec) {
             // 3 - Update RoomID
             that.roomID = roomId;
 
-            L.Logger.info("Connected to room " + that.roomID);
+            console.log("Connected to room " + that.roomID);
 
             connectEvt = Erizo.RoomEvent({type: "room-connected", streams: streamList});
             that.dispatchEvent(connectEvt);
         }, function (error) {
-            L.Logger.error("Not Connected! Error: " + error);
+            console.log("Not Connected! Error: " + error);
         });
     };
 
@@ -5742,7 +4893,7 @@ Erizo.Room = function (spec) {
                     sendSDPSocket('publish', {state: 'url', data: stream.hasData(), audio: stream.hasAudio(), video: stream.hasVideo(), attributes: stream.getAttributes()}, stream.url, function (answer, id) {
 
                         if (answer === 'success') {
-                            L.Logger.info('Stream published');
+                            console.log('Stream published');
                             stream.getID = function () {
                                 return id;
                             };
@@ -5754,7 +4905,7 @@ Erizo.Room = function (spec) {
                             if (callback)
                                 callback();
                         } else {
-                            L.Logger.info('Error when publishing the stream', answer);
+                            console.log('Error when publishing the stream', answer);
                             // Unauth -1052488119
                             // Network -5
                             if (callbackError)
@@ -5771,7 +4922,7 @@ Erizo.Room = function (spec) {
                             if (callbackError)
                                 callbackError(answer);
                         }
-                        L.Logger.info('Stream published');
+                        console.log('Stream published');
                         stream.getID = function () {
                             return id;
                         };
@@ -5796,7 +4947,7 @@ Erizo.Room = function (spec) {
                             stream.pc.onsignalingmessage = function (ok) {
                                 stream.pc.onsignalingmessage = function () {};
                                 sendSDPSocket('publish', {state: 'ok', streamId: id, data: stream.hasData(), audio: stream.hasAudio(), video: stream.hasVideo(), screen: stream.hasScreen(), attributes: stream.getAttributes()}, ok);
-                                L.Logger.info('Stream published');
+                                console.log('Stream published');
                                 stream.getID = function () {
                                     return id;
                                 };
@@ -5822,7 +4973,7 @@ Erizo.Room = function (spec) {
                             callbackError(answer);
                         return;
                     }
-                    L.Logger.info('Stream published');
+                    console.log('Stream published');
                     stream.getID = function () {
                         return id;
                     };
@@ -5838,13 +4989,13 @@ Erizo.Room = function (spec) {
 
     that.startRecording = function (stream){
       recordingUrl = "/tmp/recording" + stream.getID() + ".mkv";
-      L.Logger.debug("Start Recording " + recordingUrl);
+      console.log("Start Recording " + recordingUrl);
       sendMessageSocket('startRecorder',{to:stream.getID(), url: recordingUrl});
-    }
+    };
 
     that.stopRecording = function (stream){
       sendMessageSocket('stopRecorder',{to:stream.getID(),url:recordingUrl});
-    }
+    };
 
     // It unpublishes the local stream in the room, dispatching a StreamEvent("stream-removed")
     that.unpublish = function (stream) {
@@ -5897,7 +5048,7 @@ Erizo.Room = function (spec) {
 
                     stream.pc.onaddstream = function (evt) {
                         // Draw on html
-                        L.Logger.info('Stream subscribed');
+                        console.log('Stream subscribed');
                         stream.stream = evt.stream;
                         var evt2 = Erizo.StreamEvent({type: 'stream-subscribed', stream: stream});
                         that.dispatchEvent(evt2);
@@ -5910,17 +5061,17 @@ Erizo.Room = function (spec) {
                             callbackError(answer);
                         return;
                     }
-                    L.Logger.info('Stream subscribed');
+                    console.log('Stream subscribed');
                     var evt = Erizo.StreamEvent({type: 'stream-subscribed', stream: stream});
                     that.dispatchEvent(evt);
                 });
             } else {
-                L.Logger.info("Subscribing to anything");
+                console.log("Subscribing to anything");
                 return;
             }
 
             // Subscribe to stream stream
-            L.Logger.info("Subscribing to: " + stream.getID());
+            console.log("Subscribing to: " + stream.getID());
         }
     };
 
@@ -5938,7 +5089,7 @@ Erizo.Room = function (spec) {
                     }
                     removeStream(stream);
                 }, function () {
-                    L.Logger.error("Error calling unsubscribe.");
+                    console.log("Error calling unsubscribe.");
                 });
             }
         }
@@ -5966,135 +5117,7 @@ Erizo.Room = function (spec) {
 
     return that;
 };
-/*global document, console*/
-
 var L = L || {};
-
-/*
- * API to write logs based on traditional logging mechanisms: debug, trace, info, warning, error
- */
-L.Logger = (function (L) {
-    "use strict";
-    var DEBUG = 0, TRACE = 1, INFO = 2, WARNING = 3, ERROR = 4, NONE = 5, logLevel = DEBUG, enableLogPanel, setLogLevel, log, debug, trace, info, warning, error;
-
-    // By calling this method we will not use console.log to print the logs anymore. Instead we will use a <textarea/> element to write down future logs
-    enableLogPanel = function () {
-        L.Logger.panel = document.createElement('textarea');
-        L.Logger.panel.setAttribute("id", "licode-logs");
-        L.Logger.panel.setAttribute("style", "width: 100%; height: 100%; display: none");
-        L.Logger.panel.setAttribute("rows", 20);
-        L.Logger.panel.setAttribute("cols", 20);
-        L.Logger.panel.setAttribute("readOnly", true);
-        document.body.appendChild(L.Logger.panel);
-    };
-
-    // It sets the new log level. We can set it to NONE if we do not want to print logs
-    setLogLevel = function (level) {
-        if (level > L.Logger.NONE) {
-            level = L.Logger.NONE;
-        } else if (level < L.Logger.DEBUG) {
-            level = L.Logger.DEBUG;
-        }
-        L.Logger.logLevel = level;
-    };
-
-    // Generic function to print logs for a given level: L.Logger.[DEBUG, TRACE, INFO, WARNING, ERROR]
-    log = function (level) {
-        var out = '';
-        if (level < L.Logger.logLevel) {
-            return;
-        }
-        if (level === L.Logger.DEBUG) {
-            out = out + "DEBUG";
-        } else if (level === L.Logger.TRACE) {
-            out = out + "TRACE";
-        } else if (level === L.Logger.INFO) {
-            out = out + "INFO";
-        } else if (level === L.Logger.WARNING) {
-            out = out + "WARNING";
-        } else if (level === L.Logger.ERROR) {
-            out = out + "ERROR";
-        }
-        out = out + ": ";
-        var args = [];
-        for (var i = 0; i < arguments.length; i++) {
-            args[i] = arguments[i];
-        }
-        var tempArgs = args.slice(1);
-        var args = [out].concat(tempArgs);
-        if (L.Logger.panel !== undefined) {
-            var tmp = '';
-            for (var idx = 0; idx < args.length; idx++) {
-                tmp = tmp + args[idx];
-            }
-            L.Logger.panel.value = L.Logger.panel.value + "\n" + tmp;
-        } else {
-            console.log.apply(console, args);
-        }
-    };
-
-    // It prints debug logs
-    debug = function () {
-        var args = [];
-        for (var i = 0; i < arguments.length; i++) {
-            args[i] = arguments[i];
-        }
-        L.Logger.log.apply(L.Logger,[L.Logger.DEBUG].concat(args));
-    };
-
-    // It prints trace logs
-    trace = function () {
-        var args = [];
-        for (var i = 0; i < arguments.length; i++) {
-            args[i] = arguments[i];
-        }
-        L.Logger.log.apply(L.Logger,[L.Logger.TRACE].concat(args));
-    };
-
-    // It prints info logs
-    info = function () {
-        var args = [];
-        for (var i = 0; i < arguments.length; i++) {
-            args[i] = arguments[i];
-        }
-        L.Logger.log.apply(L.Logger,[L.Logger.INFO].concat(args));
-    };
-
-    // It prints warning logs
-    warning = function () {
-        var args = [];
-        for (var i = 0; i < arguments.length; i++) {
-            args[i] = arguments[i];
-        }
-        L.Logger.log.apply(L.Logger,[L.Logger.WARNING].concat(args));
-    };
-
-    // It prints error logs
-    error = function () {
-        var args = [];
-        for (var i = 0; i < arguments.length; i++) {
-            args[i] = arguments[i];
-        }
-        L.Logger.log.apply(L.Logger,[L.Logger.ERROR].concat(args));
-    };
-
-    return {
-        DEBUG: DEBUG,
-        TRACE: TRACE,
-        INFO: INFO,
-        WARNING: WARNING,
-        ERROR: ERROR,
-        NONE: NONE,
-        enableLogPanel: enableLogPanel,
-        setLogLevel: setLogLevel,
-        log: log,
-        debug: debug,
-        trace: trace,
-        info: info,
-        warning: warning,
-        error: error
-    };
-}(L));var L = L || {};
 L.Base64 = (function (L) {
     "use strict";
     var END_OF_INPUT, base64Chars, reverseBase64Chars, base64Str, base64Count, i, setBase64Str, readBase64, encodeBase64, readReverseBase64, ntos, decodeBase64;
@@ -6228,22 +5251,7 @@ L.Base64 = (function (L) {
         encodeBase64: encodeBase64,
         decodeBase64: decodeBase64
     };
-}(L));/*
- * View class represents a HTML component
- * Every view is an EventDispatcher.
- */
-var Erizo = Erizo || {};
-Erizo.View = function (spec) {
-	"use strict";
-
-    var that = Erizo.EventDispatcher({});
-
-    // Variables
-
-    // URL where it will look for icons and assets
-    that.url = "http://chotis2.dit.upm.es:3000";
-    return that;
-};
+}(L));
 
 /**
  * VideoPlayer.js file
@@ -6269,318 +5277,15 @@ Erizo.VideoPlayer = function (spec) {
 
     // It will stop the VideoPlayer and remove it from the HTML
     that.destroy = function () {        
-    	return pcManagerJS.call_method(PCManagerJS.method_map['player_delete'], that.stream.pc_id, {'play_id':that.id,
+    	return pcManagerJS.call_method('player_delete', that.stream.pc_id, {'play_id':that.id,
     		'stream_type':that.stream.stream_type, 'view_id':that.elementID});
     };
 
-    pcManagerJS.call_method(PCManagerJS.method_map['player_new'], that.stream.pc_id, {'play_id':that.id,
+    pcManagerJS.call_method('player_new', that.stream.pc_id, {'play_id':that.id,
     	'stream_type':that.stream.stream_type, 'view_id':that.elementID});
     
     return that;
-};/*global window, console, clearInterval, setInterval, document, unescape, L, webkitURL*/
-/*
- * AudioPlayer represents a Licode Audio component that shows either a local or a remote Audio.
- * Ex.: var player = AudioPlayer({id: id, stream: stream, elementID: elementID});
- * A AudioPlayer is also a View component.
- */
-var Erizo = Erizo || {};
-Erizo.AudioPlayer = function (spec) {
-    "use strict";
-
-    var that = Erizo.View({}),
-        onmouseover,
-        onmouseout;
-
-    // Variables
-
-    // AudioPlayer ID
-    that.id = spec.id;
-
-    // Stream that the AudioPlayer will play
-    that.stream = spec.stream.stream;
-
-    // DOM element in which the AudioPlayer will be appended
-    that.elementID = spec.elementID;
-
-
-    L.Logger.debug('Creating URL from stream ' + that.stream);
-    var myURL = window.URL || webkitURL;
-    that.stream_url = myURL.createObjectURL(that.stream);
-
-    // Audio tag
-    that.audio = document.createElement('audio');
-    that.audio.setAttribute('id', 'stream' + that.id);
-    that.audio.setAttribute('style', 'width: 100%; height: 100%; position: absolute');
-    that.audio.setAttribute('autoplay', 'autoplay');
-
-    if(spec.stream.local) 
-        that.audio.volume = 0;
-
-    if(spec.stream.local) 
-        that.audio.volume = 0;
-
-
-    if (that.elementID !== undefined) {
-
-        // It will stop the AudioPlayer and remove it from the HTML
-        that.destroy = function () {
-            that.audio.pause();
-            //clearInterval(that.resize);
-            that.parentNode.removeChild(that.div);
-        };
-
-        onmouseover = function (evt) {
-            that.bar.display();
-        };
-
-        onmouseout = function (evt) {
-            that.bar.hide();
-        };
-
-        // Container
-        that.div = document.createElement('div');
-        that.div.setAttribute('id', 'player_' + that.id);
-        that.div.setAttribute('style', 'width: 100%; height: 100%; position: relative; overflow: hidden;');
-
-        document.getElementById(that.elementID).appendChild(that.div);
-        that.container = document.getElementById(that.elementID);
-
-        that.parentNode = that.div.parentNode;
-
-        that.div.appendChild(that.audio);
-
-        // Bottom Bar
-        that.bar = new Erizo.Bar({elementID: 'player_' + that.id, id: that.id, stream: spec.stream, media: that.audio, options: spec.options});
-
-        that.div.onmouseover = onmouseover;
-        that.div.onmouseout = onmouseout;
-
-    } else {
-        // It will stop the AudioPlayer and remove it from the HTML
-        that.destroy = function () {
-            that.audio.pause();
-            //clearInterval(that.resize);
-            that.parentNode.removeChild(that.audio);
-        };
-
-        document.body.appendChild(that.audio);
-        that.parentNode = document.body;
-    }
-
-    that.audio.src = that.stream_url;
-
-    return that;
-};/*global window, document, clearTimeout, setTimeout */
-
-/*
- * Bar represents the bottom menu bar of every mediaPlayer.
- * It contains a Speaker and an icon.
- * Every Bar is a View.
- * Ex.: var bar = Bar({elementID: element, id: id});
- */
-var Erizo = Erizo || {};
-Erizo.Bar = function (spec) {
-    "use strict";
-    var that = Erizo.View({}),
-        waiting,
-        show;
-
-    // Variables
-
-    // DOM element in which the Bar will be appended
-    that.elementID = spec.elementID;
-
-    // Bar ID
-    that.id = spec.id;
-
-    // Container
-    that.div = document.createElement('div');
-    that.div.setAttribute('id', 'bar_' + that.id);
-
-    // Bottom bar
-    that.bar = document.createElement('div');
-    that.bar.setAttribute('style', 'width: 100%; height: 15%; max-height: 30px; position: absolute; bottom: 0; right: 0; background-color: rgba(255,255,255,0.62)');
-    that.bar.setAttribute('id', 'subbar_' + that.id);
-
-    // Lynckia icon
-    that.link = document.createElement('a');
-    that.link.setAttribute('href', 'http://www.lynckia.com/');
-    that.link.setAttribute('target', '_blank');
-
-    that.logo = document.createElement('img');
-    that.logo.setAttribute('style', 'width: 100%; height: 100%; max-width: 30px; position: absolute; top: 0; left: 2px;');
-    that.logo.setAttribute('alt', 'Lynckia');
-    that.logo.setAttribute('src', that.url + '/assets/star.svg');
-
-    // Private functions
-    show = function (displaying) {
-        if (displaying !== 'block') {
-            displaying = 'none';
-        } else {
-            clearTimeout(waiting);
-        }
-
-        that.div.setAttribute('style', 'width: 100%; height: 100%; position: relative; bottom: 0; right: 0; display:' + displaying);
-    };
-
-    // Public functions
-
-    that.display = function () {
-        show('block');
-    };
-
-    that.hide = function () {
-        waiting = setTimeout(show, 1000);
-    };
-
-    document.getElementById(that.elementID).appendChild(that.div);
-    that.div.appendChild(that.bar);
-    that.bar.appendChild(that.link);
-    that.link.appendChild(that.logo);
-
-    // Speaker component
-    if (!spec.stream.screen && (spec.options === undefined || spec.options.speaker === undefined || spec.options.speaker === true)) {
-        that.speaker = new Erizo.Speaker({elementID: 'subbar_' + that.id, id: that.id, stream: spec.stream, media: spec.media});
-    }
-
-    that.display();
-    that.hide();
-
-    return that;
-};/*global window, console, document */
-/*
- * Speaker represents the volume icon that will be shown in the mediaPlayer, for example.
- * It manages the volume level of the media tag given in the constructor.
- * Every Speaker is a View.
- * Ex.: var speaker = Speaker({elementID: element, media: mediaTag, id: id});
- */
-var Erizo = Erizo || {};
-Erizo.Speaker = function (spec) {
-    "use strict";
-    var that = Erizo.View({}),
-        show,
-        mute,
-        unmute,
-        lastVolume = 50,
-        muted = false;
-
-    // Variables
-
-    // DOM element in which the Speaker will be appended
-    that.elementID = spec.elementID;
-
-    // media tag
-    that.media = spec.media;
-
-    // Speaker id
-    that.id = spec.id;
-
-    // MediaStream
-    that.stream = spec.stream;
-
-    // Container
-    that.div = document.createElement('div');
-    that.div.setAttribute('style', 'width: 40%; height: 100%; max-width: 32px; position: absolute; right: 0;z-index:0;');
-
-    // Volume icon 
-    that.icon = document.createElement('img');
-    that.icon.setAttribute('id', 'volume_' + that.id);
-    that.icon.setAttribute('src', that.url + '/assets/sound48.png');
-    that.icon.setAttribute('style', 'width: 80%; height: 100%; position: absolute;');
-    that.div.appendChild(that.icon);
-
-
-    if (!that.stream.local) {
-
-        // Volume bar
-        that.picker = document.createElement('input');
-        that.picker.setAttribute('id', 'picker_' + that.id);
-        that.picker.type = "range";
-        that.picker.min = 0;
-        that.picker.max = 100;
-        that.picker.step = 10;
-        that.picker.value = lastVolume;
-        that.div.appendChild(that.picker);
-        that.media.volume = that.picker.value / 100;
-
-        that.picker.oninput = function (evt) {
-            if (that.picker.value > 0) {
-                muted = false;
-                that.icon.setAttribute('src', that.url + '/assets/sound48.png');
-            } else {
-                muted = true;
-                that.icon.setAttribute('src', that.url + '/assets/mute48.png');
-            }
-            that.media.volume = that.picker.value / 100;
-        };
-
-        // Private functions
-        show = function (displaying) {
-            that.picker.setAttribute('style', 'width: 32px; height: 100px; position: absolute; bottom: 90%; z-index: 1;' + that.div.offsetHeight + 'px; right: 0px; -webkit-appearance: slider-vertical; display: ' + displaying);
-        };
-
-        mute = function () {
-            muted = true;
-            that.icon.setAttribute('src', that.url + '/assets/mute48.png');
-            lastVolume = that.picker.value;
-            that.picker.value = 0;
-            that.media.volume = 0;
-        };
-
-        unmute = function () {
-            muted = false;
-            that.icon.setAttribute('src', that.url + '/assets/sound48.png');
-            that.picker.value = lastVolume;
-            that.media.volume = that.picker.value / 100;
-        };
-
-        that.icon.onclick = function (evt) {
-            if (muted) {
-                unmute();
-            } else {
-                mute();
-            }
-        }
-
-        // Public functions
-        that.div.onmouseover = function (evt) {
-            show('block');
-        };
-
-        that.div.onmouseout = function (evt) {
-            show('none');
-        };
-
-        show('none');
-
-    } else {
-
-        mute = function () {
-            muted = true;
-            that.icon.setAttribute('src', that.url + '/assets/mute48.png');
-            that.stream.stream.getAudioTracks()[0].enabled = false;
-        };
-
-        unmute = function () {
-            muted = false;
-            that.icon.setAttribute('src', that.url + '/assets/sound48.png');
-            that.stream.stream.getAudioTracks()[0].enabled = true;
-        };
-
-        that.icon.onclick = function (evt) {
-            if (muted) {
-                unmute();
-            } else {
-                mute();
-            }
-        }
-    }
-  
-
-    document.getElementById(that.elementID).appendChild(that.div);
-    return that;
 };
-
 /**
  * PCManagerJS.js file
  */
@@ -6607,7 +5312,7 @@ PCManagerJS.prototype.pc_new = function(pc, pc_config, con) {
 	var param = {};
 	param.pc_config = pc_config;
 	param.con = con;
-	this.call_method('pc_new', PCManagerJS.pc_id, param.toString());
+	this.call_method('pc_new', PCManagerJS.pc_id, param);
 	
 	// 返回pc的id
 	return PCManagerJS.pc_id;
@@ -6615,27 +5320,29 @@ PCManagerJS.prototype.pc_new = function(pc, pc_config, con) {
 
 PCManagerJS.prototype.call_method = function(method_name, pc_id, param_obj) {
 	// pcManagerProxy是由android调用webview时注入的PCManager实例的代理对象
+	//console.log(JSON.stringify(param_str));
+	console.log("[pony86: js call_method] "+ method_name +","+ pc_id +","+ JSON.stringify(param_obj));
 	pcManagerProxy.call_method(method_name, pc_id, JSON.stringify(param_obj));
 };
 
-PCManagerJS.prototype.cb_method = function(method_name, pc_id, param_obj) {
-	//var param_obj = JSON.parse(param_str);
+PCManagerJS.prototype.cb_method = function(method_name, pc_id, param_str) {
+	var param_s = param_str;
+	var param_str1 = param_s.replace(/\r\n/g, "\\r\\n");
+	var param_obj = JSON.parse(param_str1);
+	
+	console.log("[pony86: js cb_method] "+ method_name +","+ pc_id +","+ param_str1);
 	
 	switch(method_name) {
 	case 'cb_createOffer':
 		// 根据传来的json对象，创造RTCSessionDescription
-		var sd = new RTCSessionDescription();
-		sd.type = param_obj.type;
-		sd.sdp = param_obj.sdp;
+		var sd = new RTCSessionDescription(param_obj);
 		
 		// 调用pc的createOffer的回调函数
 		PCManagerJS.pc_map[pc_id].cb_createOffer(sd);
 		break;
 	case 'cb_createAnswer':
 		// 根据传来的json对象，创造RTCSessionDescription
-		var sd = new RTCSessionDescription();
-		sd.type = param_obj.type;
-		sd.sdp = param_obj.sdp;
+		var sd = new RTCSessionDescription(param_obj);
 		
 		// 调用pc的createAnswer的回调函数
 		PCManagerJS.pc_map[pc_id].cb_createAnswer(sd);
@@ -6647,7 +5354,7 @@ PCManagerJS.prototype.cb_method = function(method_name, pc_id, param_obj) {
 		localMediaStream.stream_type = 'local';
 		
 		// 调用webkitGetUserMedia的回调函数
-		webkitGetUserMedia.cb_getUserMedia(localMediaStream);
+		navigator.webkitGetUserMedia.cb_getUserMedia(localMediaStream);
 		break;		
 	case 'onSignalingChange':
 		// 根据传来的json对象，创造state
@@ -6657,7 +5364,9 @@ PCManagerJS.prototype.cb_method = function(method_name, pc_id, param_obj) {
 		PCManagerJS.pc_map[pc_id].signalingState = state;
 		
 		// 并产生回调
-		PCManagerJS.pc_map[pc_id].onSignalingChange(state);
+		if(PCManagerJS.pc_map[pc_id].onSignalingChange) {
+			PCManagerJS.pc_map[pc_id].onSignalingChange(state);
+		}
 		break;
 	case 'onIceConnectionChange':
 		// 根据传来的json对象，创造state
@@ -6667,7 +5376,9 @@ PCManagerJS.prototype.cb_method = function(method_name, pc_id, param_obj) {
 		PCManagerJS.pc_map[pc_id].iceConnectionState = state;
 		
 		// 并产生回调
-		PCManagerJS.pc_map[pc_id].oniceconnectionchange(state);
+		if(PCManagerJS.pc_map[pc_id].oniceconnectionchange) {
+			PCManagerJS.pc_map[pc_id].oniceconnectionchange(state);
+		}
 		break;
 	case 'onIceGatheringChange':
 		// 根据传来的json对象，创造state
@@ -6677,15 +5388,17 @@ PCManagerJS.prototype.cb_method = function(method_name, pc_id, param_obj) {
 		PCManagerJS.pc_map[pc_id].iceGatheringState = state;
 		
 		// 并产生回调
-		PCManagerJS.pc_map[pc_id].onicegatheringchange(state);
+		if(PCManagerJS.pc_map[pc_id].onicegatheringchange) {
+			PCManagerJS.pc_map[pc_id].onicegatheringchange(state);
+		}
 		break;
 	case 'onIceCandidate':
 		// 根据传来的JSON对象，创造evt对象
 		var evt = {};
 		var ice = {};
-		ice.sdpMLineIndex = candidate.sdpMLineIndex;
-		ice.sdpMid = candidate.sdpMid;
-		ice.sdp = candidate.sdp;
+		ice.sdpMLineIndex = param_obj.sdpMLineIndex;
+		ice.sdpMid = param_obj.sdpMid;
+		ice.sdp = param_obj.sdp;
 		evt.candidate = ice;
 		
 		// 产生回调
@@ -6722,4 +5435,3 @@ PCManagerJS.prototype.cb_method = function(method_name, pc_id, param_obj) {
 };
 
 window.pcManagerJS = window.pcManagerJS || new PCManagerJS();
-

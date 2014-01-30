@@ -6,8 +6,7 @@
 var Erizo = Erizo || {};
 Erizo.Stream = function (spec) {
     "use strict";
-    var that = Erizo.EventDispatcher(spec),
-        getFrame;
+    var that = Erizo.EventDispatcher(spec);
 
     that.stream = spec.stream;
     that.url = spec.url;
@@ -57,7 +56,7 @@ Erizo.Stream = function (spec) {
 
     // Sends data through this stream.
     that.sendData = function (msg) {
-        L.Logger.error("Failed to send data. This Stream object has not that channel enabled.");
+        console.log("Failed to send data. This Stream object has not that channel enabled.");
     };
 
     // Initializes the stream and tries to retrieve a stream from local video and audio
@@ -65,7 +64,7 @@ Erizo.Stream = function (spec) {
     that.init = function () {
         try {
             if ((spec.audio || spec.video || spec.screen) && spec.url === undefined) {
-                L.Logger.debug("Requested access to local media");
+                console.log("Requested access to local media");
                 var videoOpt = spec.video;
                 if (videoOpt == true && that.videoSize !== undefined) {
                     videoOpt = {mandatory: {minWidth: that.videoSize[0], minHeight: that.videoSize[1], maxWidth: that.videoSize[2], maxHeight: that.videoSize[3]}};
@@ -74,7 +73,6 @@ Erizo.Stream = function (spec) {
                 if (spec.screen) {
                     opt = {video: {mandatory: {chromeMediaSource: 'screen', maxWidth: screen.availWidth, maxHeight: screen.availHeight}}};
                 }
-                L.Logger.debug(JSON.stringify(opt));
                 Erizo.GetUserMedia(opt, function (stream) {
                 //navigator.webkitGetUserMedia("audio, video", function (stream) {
 
@@ -94,7 +92,7 @@ Erizo.Stream = function (spec) {
                 that.dispatchEvent(streamEvent);
             }
         } catch (e) {
-            L.Logger.error("Error accessing to local media", e);
+            console.log("Error accessing to local media", e);
         }
     };
 
@@ -138,62 +136,7 @@ Erizo.Stream = function (spec) {
     };
 
     that.show = that.play;
-    that.hide = that.stop;
-
-    getFrame = function () {
-        if (that.player !== undefined && that.stream !== undefined) {
-            var video = that.player.video,
-
-                style = document.defaultView.getComputedStyle(video),
-                width = parseInt(style.getPropertyValue("width"), 10),
-                height = parseInt(style.getPropertyValue("height"), 10),
-                left = parseInt(style.getPropertyValue("left"), 10),
-                top = parseInt(style.getPropertyValue("top"), 10),
-
-                div = document.getElementById(that.elementID),
-                divStyle = document.defaultView.getComputedStyle(div),
-                divWidth = parseInt(divStyle.getPropertyValue("width"), 10),
-                divHeight = parseInt(divStyle.getPropertyValue("height"), 10),
-
-                canvas = document.createElement('canvas'),
-                context;
-
-            canvas.id = "testing";
-            canvas.width = divWidth;
-            canvas.height = divHeight;
-            canvas.setAttribute('style', 'display: none');
-            //document.body.appendChild(canvas);
-            context = canvas.getContext('2d');
-
-            context.drawImage(video, left, top, width, height);
-
-            return canvas;
-        } else {
-            return null;
-        }
-    };
-
-    that.getVideoFrameURL = function (format) {
-        var canvas = getFrame();
-        if (canvas !== null) {
-            if (format) {
-                return canvas.toDataURL(format);
-            } else {
-                return canvas.toDataURL();
-            }
-        } else {
-            return null;
-        }
-    };
-
-    that.getVideoFrame = function () {
-        var canvas = getFrame();
-        if (canvas !== null) {
-            return canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
-        } else {
-            return null;
-        }
-    };
+    that.hide = that.stop;  
 
     return that;
 };

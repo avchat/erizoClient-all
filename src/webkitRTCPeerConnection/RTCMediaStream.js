@@ -1,16 +1,13 @@
 
-
 /**
  * RTCMediaStream.js file
  */
 
-MediaStream = function() {	
+RTCMediaStream = function() {	
 	this.pc_id = "";
 	this.stream_type = "local";
 };
 
-MediaStream.prototype.stop = function() {
-	return pcManagerJS.call_method(PCManagerJS.method_map['mediastream_stop'], this.pc_id, {});
+RTCMediaStream.prototype.stop = function() {
+	return pcManagerJS.call_method('mediastream_stop', this.pc_id, {});
 };
-
-

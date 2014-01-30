@@ -14,7 +14,7 @@ Erizo.Connection = function (spec) {
     that.browser = "";
     
  /*   if (typeof module !== 'undefined' && module.exports) {
-        L.Logger.error('Publish/subscribe video/audio streams not supported in erizofc yet');
+        console.log('Publish/subscribe video/audio streams not supported in erizofc yet');
         that = Erizo.FcStack(spec);
     } else if (window.navigator.userAgent.match("Firefox") !== null) {
         // Firefox
@@ -22,12 +22,11 @@ Erizo.Connection = function (spec) {
         that = Erizo.FirefoxStack(spec);
     } else if (window.navigator.appVersion.match(/Chrome\/([\w\W]*?)\./)[1] <= 32) {
         // Google Chrome Stable.*/
-        L.Logger.debug("Stable!");
         that = Erizo.ChromeStableStack(spec);
         that.browser = "chrome-stable";
  /*   } else if (window.navigator.userAgent.toLowerCase().indexOf("chrome")>=0) {
         // Google Chrome Canary.
-        L.Logger.debug("Canary!"); 
+        console.log("Canary!"); 
         that = Erizo.ChromeCanaryStack(spec);
         that.browser = "chrome-canary";
     }  else if (window.navigator.appVersion.match(/Bowser\/([\w\W]*?)\./)[1] === "25") {
@@ -51,7 +50,7 @@ Erizo.GetUserMedia = function (config, callback, error) {
                        navigator.msGetUserMedia);
 
     if (typeof module !== 'undefined' && module.exports) {
-        L.Logger.error('Video/audio streams not supported in erizofc yet');
+        console.log('Video/audio streams not supported in erizofc yet');
     } else {
         navigator.getMedia(config, callback, error);
     }
